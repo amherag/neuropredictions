@@ -1,0 +1,118 @@
+/*  Agent0 interpreter  :
+ *   File #2 : 
+ *   Belief Revision Ver2 
+ */
+
+
+/*  Beliefs are stored as a list :
+ *
+ *   b(Agent1,Pred1,[[Time1,t],[Time2,f],[Time3,t]]).
+ * 
+ *  means that Agent1 started to believe Pred1 at Time1, believes
+ *  that Pred1 turns false at TIme2, and is true again for all times
+ *  after Time3.  Before Time1, Agent1 has no belief about Pred1
+ *
+ *  The following belief :
+ *
+ *   b(Agent1,Pred1[[Time1,t],[Time2,t],[Time3,f]]).
+ *
+ *  IS legal, since each element in the list is a datapoint - The agent
+ *  knows the truth value of the pred at each time because s/he was told
+ *  or "saw" that is was true           
+ *
+ *  Beleifs are querried with : believes(Agent,Pred,Time,TV).
+ *  TV can have the value t,f or u for true,false, and unknown,
+ *  respectively.
+ */
+
+:- assert(b(a,b,c)).
+:- retract(b(a,b,c)).
+
+invert_truth(t,f).
+invert_truth(f,t).
+invert_truth(u,u).
+
+add_new_beliefs(Agent,[]).
+
+add_new_beliefs(Agent,[First|Rest]) :- add_belief(Agent,First),
+                                       add_new_beliefs(Agent,Rest).
+
+nested_nots(not(Belief),OldTV,NewBelief,NTV) :- 
+                             nested_nots(Belief,OldTV,NewBelief,TV),
+                             invert_truth(TV,NTV),!.
+
+nested_nots(Belief,OldTV,Belief,OldTV).
+
+remove_nots(not(Belief),NewBelief) :- remove_nots(Belief,NewBelief),!.
+
+remove_nots(Belief,Belief).
+
+add_in_nots(not(Belief),OTV,NTV) :- add_in_nots(Belief,OTV,TV),
+                                    invert_truth(TV,NTV),!.
+
+add_in_nots(Belief,TV,TV).
+add_belief(Agent,[Time,Belief]) :- nested_nots(Belief,t,NewBelief,TV),
+                                  add_belief(Agent,[Time,NewBelief,TV]).
+
+/*  If we believe nothing about this fact yet, insert a new belief into
+ *  the database.
+ */
+add_belief(Agent,[Time,Belief,TruthValue]) :- not(b(Agent,Belief,X)),
+                             assertz(b(Agent,Belief,[[Time,TruthValue]])).
+
+/*  If we already believe something about the fact, insert a new belief 
+ *  change to the belief database
+ */
+add_belief(Agent,[Time,Belief,TruthValue]) :- b(Agent,Belief,Old),
+                                  add_to_belief_list(Old,Time,TruthValue,New),
+                                  retract(b(Agent,Belief,Old)),
+                                  assertz(b(Agent,Belief,New)).
+
+/*  If we've reached the end of the belief change  list, add the new change
+ *  to the end of the list.
+ */
+add_to_belief_list([],Time,TruthValue,[[Time,TruthValue]]).
+
+/*  If there is a belief change at this time already, we overwrite it
+ */
+add_to_belief_list([[Time,TruthValue]|Rest],Time,NewTruth,
+                [[Time,NewTruth]|Rest]).
+
+/*  If the new belief change belongs at the front of the list, inset it
+ *  at the beginning.
+ */
+add_to_belief_list([[FirstTime,TruthValue]|Rest],Time,NewTruth,
+                [[Time,NewTruth],[FirstTime,TruthValue]|Rest]) :-
+                                  less(FirstTime,Time).
+                       
+
+add_to_belief_list([[FirstTime,TruthValue]|Rest],Time,NewTruth,
+                [[FirstTime,TruthValue]|Result]) :-  
+                       add_to_belief_list(Rest,Time,NewTruth,Result).
+
+
+
+/*  If the agent has some data on Belief then the list of belief changes is
+ *  consulted to find the truth value at the time requested.
+ */
+believes(Agent,[Time,Belief],NTV) :- remove_nots(Belief,NewBelief),
+                                no_nots_believes(Agent,[Time,NewBelief],TV),
+                                add_in_nots(Belief,TV,NTV).
+
+/*  If the agent has no data on Belief, then u is returned      
+ */
+no_nots_believes(Agent,[Time,Belief],u) :- not(b(Agent,Belief,Timelist)),!.
+
+no_nots_believes(Agent,[Time,Belief],TV) :- b(Agent,Belief,TruthList),
+                                          get_belief(TruthList,Time,TV).
+
+
+/* If a time before we have knowledge is querried, then u is returned
+ */
+get_belief([],Time,u).
+
+get_belief([[FT,TV]|Rest],Time,TV) :-  not(less(Time,FT)),!.
+
+get_belief([[FirstTime,TV]|Rest],Time,Result) :- get_belief(Rest,Time,Result).
+
+

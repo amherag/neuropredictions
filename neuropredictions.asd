@@ -13,10 +13,18 @@
                :envy
                :cl-ppcre
                :uiop
+               :uuid
 
                ;; for predict module
                :cl21
                :lparallel
+               :local-time
+               :clnuplot
+               :dexador
+               :alexandria
+               :cl-json
+               ;; :clml
+               :fare-memoization
                
                ;; for @route annotation
                :cl-syntax-annot
@@ -30,7 +38,7 @@
   :components ((:module "src"
                 :components
                 ((:file "main" :depends-on ("config" "view" "db"))
-                 (:file "web" :depends-on ("view"))
+                 (:file "web" :depends-on ("view" "predict"))
                  (:file "view" :depends-on ("config"))
                  (:file "db" :depends-on ("config"))
                  (:file "config")

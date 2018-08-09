@@ -1,0 +1,16 @@
+
+;;; TIMERANGE-COMMIT is a meta-action which does nothing but
+;;; make committments for each time between t1 and t2
+(defun timerange-commit (t1 t2 gx gy)
+  (do ((x t1))
+      ((> x t2))
+      (inform-fact 'PLANE `(now (cmt plane plane (do ,x (make-distance ,(- t2 x) ,gx ,gy)))))
+      (setq x (+ x *move-step*)))
+  ())
+				
+(defun timerange-uncommit (t1 t2 gx gy)
+  (do ((x t1))
+      ((> x t2))
+      (inform-fact 'PLANE `(now (not (cmt plane plane (do ,x (make-distance ,(- t2 x) ,gx ,gy))))))
+      (setq x (+ x *move-step*)))
+  ())

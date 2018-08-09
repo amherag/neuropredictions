@@ -11,6 +11,8 @@
                 :compile-template*
                 :render-template*
                 :*djula-execute-package*)
+  (:import-from :cl-json
+                :encode-json-to-string)
   (:import-from :datafly
                 :encode-json)
   (:export :render
@@ -32,7 +34,7 @@
 
 (defun render-json (object)
   (setf (getf (response-headers *response*) :content-type) "application/json")
-  (encode-json object))
+  (encode-json-to-string object))
 
 
 ;;

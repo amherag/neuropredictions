@@ -1,0 +1,10 @@
+/*
+ * Since Quintus doesn't give us a not ...
+ *
+ *    here's one of our own
+ */
+
+not(A) :- call(A),
+          !,fail.
+
+not(A).

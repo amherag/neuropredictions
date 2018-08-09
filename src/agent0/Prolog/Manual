@@ -1,0 +1,265 @@
+AGENT0 Manual
+Quintus PROLOG implementation
+David Galles
+
+Please direct questions & bugs to :
+   galles@neon.stanford.edu
+
+The files required for the interpreter are : 
+
+int.bel              belief revision
+int.com              commitment rules
+int.time             how time is dealt with
+int.tick             overall simulation
+int.msg              message passing
+int.chng             Quintus dependant calls :
+                       File I/O
+                       Time system calls
+                                              
+
+Quintus libraries used :
+  date
+  strings
+  files
+____
+
+How to run the interpreter :
+
+1. Start Quintus Prolog
+2. Load interpreter : type ['agent0'].
+3. Load agents : type [<agent filename>].
+
+ - Note : all agents must be loaded at once - determine which agents
+ -        you wish to use, concatinate all of their programs into one
+ -        file, and load it.  If you wish to be able to load new agents
+ -        at will, change all agent programs to : 
+ -          :- assert(who_am_i(<agent name>))
+ -          :- assert(can(<agent name>, do(<Time>,<Private Action>)))
+ -          ... etc.
+ -        This is because of the way Quintus deals with compiled terms
+
+4. You are now ready to run AGENT0.  Things you can do :
+
+Run one tick : type tick.
+
+Simulate for X time : type simulate(for,X).
+     to simulate for 1 hour, 5 minutes, 28 seconds :
+         simulate(for,[0,0,0,1,5,28]).
+
+Simulate until time X  : type simulate(until,X).
+     to simulate until June 6,1991, 12:03:22 pm
+         simulate(until,[5,6,91,12,03,22]).
+
+Send a message to an Agent : type send_message(Agentfrom,Agentto,Type,Content).
+ where Agentfrom is who the message is from
+       Agentto is who the message is to
+       Type is the message type, either inform or request
+       Content is the content of the message, either a <Fact> or
+          and <Action> - see the BNF below for exact descriptions of <Fact>
+          and <Action>
+
+Add to an agent's beliefs : type add_belief(Agent,Fact)
+ where Agent is the agent whose beliefs are being modified
+       Fact is the fact being added, see <Fact> below for format
+
+____
+
+What follows is the structure & syntax of an agent program :
+{ X }    means X is optional
+{ X } *  means X can occur zero or more times
+
+Agent Program :
+
+who_am_i(<agent name>).
+
+{ can(<agent name>, do(<Time>,<Private Action>)). } *
+
+{ :- assert(b(<agent name>, <BeliefKernal>, <Time List>)). } *
+   /*  this is asserted because we'll need to be able to change  */
+   /*  beliefs later, and compiled rules cannot be changed       */
+
+{ commit(<agent name>, <Msgpattern>, <Mntlcond>, <Agent>, <Action>). } *
+
+{ agent predicates } *
+___
+Definitions of non-termals :
+
+<agent name>  ::== Name of current agent, must be prolog term.
+
+<Time> ::== interger    | 
+            <Variable>  |
+            [Month,Date,Year,Hour,Min,Sec]    /* all integers */
+
+<Private Action> ::== Prolog "Funtion" or <Variable>
+                      - executed by call(<Private Action>)
+
+<Predicate> ::== Prolog Term | <Variable>
+
+<Arguments> ::==  Prolog Tem | <Variable> |
+                  <Arguments>,<Arguments>
+
+<Action> ::== do(<Time>, <Private Action>)           |
+              inform(<Time>,<Agent>,<Fact>)          |
+              request(<Time>,<Agent>,<Action>)       |
+              unrequest(<Time>,<Agent>,<Action>)     |
+              refrain(<Action>)                      |
+              if(<Mntlcond>,<Action>)                |
+
+<Mntlcond> ::== [<Mntlpattern>, <Mntlpattern> ... <Mntlpattern>]  
+         /* Which is equivalent to :                                      */
+         /*    <Mntlpattern> AND <Mntlpattern> AND ... AND <Mntlpattern>  */
+
+<Mnltpattern> ::== b(<Fact>) |
+                   not(Mntlcond)
+
+<Fact> ::==  [<time>,<BeliefKernal>]
+
+<BeliefKernal> ::==   <Pred>{(<Arguments>)}                 |
+                       b(<Other Agent>,<Fact>)]             |
+                       cmt(<Agent>, <Agent>, <Action>)]     |
+                       can(<Agent>,<Action>)
+
+<Msgpattern> ::== [<Agnet>, inform, <Fact>]     |
+                  [<Agent>, request, <action>]  |
+                   nil     /* empty */
+  
+<Variable> ::== Upper Case Atom (Prolog Variable)
+
+____
+Sample Agents
+
+who_am_i(greeter).
+
+/* initial belief : starting at midnigt, Jan 1, 1991, 
+ *  greeter believes myfriend(smith)
+ */
+:- assert(b(greeter,myfriend(smith),[[[0,0,91,0,0,0],t]])).
+
+/* greeter can sayhi and sayhowdy
+ *  at any time
+ *
+ * he can also inform, request, and refrain
+ */
+can(greeter,do(Time,sayhi)).
+can(greeter,do(Time,sayhowdy)).
+can(greeter,inform(A,B,C)).
+can(greeter,request(A,B,C)).
+can(greeter,refrain(A,B,C)).
+
+/* greeter will sayhi if anyone asks
+ */
+commit(greeter,[A,request,do(Time,sayhi)],[],A,do(Time,sayhi)).
+
+/* greeter will do anything for his friends
+ */
+commit(greeter,[A,request,B],b([10,myfriend(A)]),A,B).
+
+
+/*  The private action predicates :
+ */
+sayhowdy :- write('Howdy!'),nl.
+
+sayhi :- write('Hi there'),nl.
+
+___
+Here's a sample AGENT0 sesson :
+       
+| ?- what_time_is_it(Now).  /*  See what time it is  */
+
+Now = [4,16,91,1,52,31] ;   /*  4/16/91, 1:52:31 am  */
+
+no
+| ?- add_belief(greeter,[[4,16,91,0,0,0],on(a,b)]).
+                           /* make greeter believe on(a,b) for the time */
+                           /* point 4/16/91 12:00:00 am                 */
+
+yes
+| ?- send_message(smith,greeter,inform,[[4,16,91,16,22,0],not(on(a,b))]).
+                           /* send a message from smith to greeter informing */
+                           /* him that not(on(a,b)) for the time point       */
+                           /*  4/16/91 4:22:00 pm                            */
+
+yes
+| ?- tick.      /*  run a tick  */
+getting message ..
+                /* greeter got the message */
+yes
+| ?- b(A,B,C).   /* check out all beliefs in the system  */
+
+A = greeter,
+B = myfriend(smith),
+C = [[[0,0,91,0,0,0],t]] ;
+                /* smith is greeter's friend on 1/0/91 12:00:00 am */
+                           
+A = greeter,
+B = on(a,b),
+C = [[[4,16,91,16,22,0],f],[[4,16,91,0,0,0],t]] ;
+               /* greeter believes on(a,b) to be false on 5/16/91 4:22:00pm */
+               /*  but to be true on 5/16/91 12:00:00 am                    */
+
+A = greeter,
+B = b(smith,not(on(a,b))),
+C = [[[4,16,91,16,22,0],t]] ;
+              /* greeter believes that smith believes not(on(a,b)) starting */
+              /* at 5/16/91 4:22:00 pm                                      */
+no
+| ?- send_message(smith,greeter,request,if(b([[4,16,91,1,0,0],on(a,b)]),
+                  do([4,16,91,1,0,0],sayhowdy))).
+
+             /* send a message from smith to greeter, requesting him to */
+             /* sayhowdy at 4/16/91 at 1:00:00am if on(a,b) is true     */
+             /* on 4/16/91 1:00:00 am       */
+yes
+| ?- tick.     /* run a tick */
+getting message ..    /* got the message */
+Howdy!                   /* greeter says Howdy  */
+
+yes
+| ?- send_message(smith,greeter,request,if(b([[4,16,91,17,0,0],on(a,b)]),
+                  do([4,16,91,1,0,0],sayhowdy))).
+             
+             /* send a message from smith to greeter, requesting him to */
+             /* sayhowdy at 4/16/91 at 1:00:00am if on(a,b) is true     */
+             /* on 4/16/91 5:00:00 pm       */
+yes
+| ?- tick.   /* run a tick */
+getting message ..   /* got the message */
+                /* notice no howdy from greeter  */
+yes
+| ?- b(A,B,C).      /* look at all the beliefs again  */
+
+A = greeter,
+B = myfriend(smith),
+C = [[[0,0,91,0,0,0],t]] ;
+
+A = greeter,
+B = on(a,b),
+C = [[[4,16,91,16,22,0],f],[[4,16,91,0,0,0],t]] ;
+
+A = greeter,
+B = b(smith,not(on(a,b))),
+C = [[[4,16,91,16,22,0],t]] ;
+ 
+                /*  The three above are the same as before   */
+
+A = greeter,
+B = cmt(greeter,smith,if(b([[4,16,91,1,0,0],on(a,b)]),do([4,16,91,1,0,0],sayhowd
+y))),
+C = [[[4,16,91,1,58,6],t]] ;
+
+               /*  greeter was commited on 4/16/91 at 1:58:06 am to smith  */
+               /*  to sayhowdy on 4/16/91 1:00:00 am if on(a,b) was true   */
+               /*  at 4/16/91 1:00:00 am                                   */
+
+A = greeter,
+B = cmt(greeter,smith,if(b([[4,16,91,17,0,0],on(a,b)]),do([4,16,91,1,0,0],sayhow
+dy))),
+C = [[[4,16,91,1,59,45],t]] ;
+
+               /*  greeter was commited on 4/16/91 at 1:59:45 am to smith  */
+               /*  to sayhowdy on 4/16/91 1:00:00 am if on(a,b) was true   */
+               /*  at 4/16/91 5:00:00 pm                                   */
+
+no
+
+___

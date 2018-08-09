@@ -1,0 +1,118 @@
+
+
+;;; Grammar File: #P"/home/proj1/paren/metagramr-tables.lisp"
+;;; Generated: DATE: 6/21/1988  TIME:  12:50:45
+
+
+(in-package :user)
+
+(PROCLAIM (QUOTE (SPECIAL PAREN::*LEXICON* PAREN::*PRETERMINAL-INDICES* PAREN::*TERMINAL-INDICES* PAREN::*PRODUCTION-INFO* PAREN::*ACTION-TABLE* PAREN::*GOTO-TABLE* PAREN::*LR-PARSER-START-STATE-INDEX* PAREN::*END-SYMBOL-INDEX* PAREN::*CLIENT-LAMBDAS*)))
+
+;;; ***LEXICON***
+
+(setq PAREN::*LEXICON* 
+#("<EMPTY>" "<START>" "<$>" "IDENTIFIER" "START" "PACKAGE-DECL" "PRETERMINAL-DECL" "PRODS" "PRETERMINALS" "ID-LIST" "PACKAGE" "PROD" "PRODUCTION" "->" "ACTION" "ID-LIST1"))
+
+
+;;; ***PRE-TERMINAL GRAMMAR SYMBOLS***
+
+(setq PAREN::*PRETERMINAL-INDICES* 
+'(3))
+
+
+;;; ***TERMINAL GRAMMAR SYMBOLS***
+
+(setq PAREN::*TERMINAL-INDICES* 
+'(2 3 8 10 12 13 14))
+
+
+;;; ***PRODUCTIONS***
+
+(setq PAREN::*PRODUCTION-INFO* 
+#((1 1) (4 3) (6 0) (6 2) (5 0) (5 2) (7 0) (7 2) (11 6) (11 4) (9 1) (15 2) (15 0)))
+
+
+;;; ***ACTION FUNCTION***
+
+(setq PAREN::*ACTION-TABLE* #(
+#((2 :R 4) (8 :R 4) (10 :S 6) (12 :R 4))
+#((2 :A 0))
+#((2 :R 2) (8 :S 4) (12 :R 2))
+#((2 :R 6) (12 :R 6))
+#((2 :R 12) (3 :R 12) (12 :R 12) (14 :R 12))
+#((2 :R 3) (12 :R 3))
+#((3 :S 7))
+#((2 :R 5) (8 :R 5) (12 :R 5))
+#((2 :R 7) (12 :R 7))
+#((3 :S 10))
+#((2 :R 8) (12 :R 8))
+#((2 :R 11) (3 :R 11) (12 :R 11) (14 :R 11))
+#((2 :R 1) (12 :S 13))
+#((3 :S 14))
+#((13 :S 15))
+#((2 :R 12) (3 :R 12) (12 :R 12) (14 :R 12))
+#((2 :R 9) (12 :R 9) (14 :S 9))
+#((2 :R 10) (3 :S 11) (12 :R 10) (14 :R 10))))
+
+
+;;; ***GOTO FUNCTION FOR NON-TERMINALS***
+
+(setq PAREN::*GOTO-TABLE* #(
+#((4 1) (5 2))
+#()
+#((6 3))
+#((7 12))
+#((9 5) (15 17))
+#()
+#()
+#()
+#()
+#()
+#()
+#()
+#((11 8))
+#()
+#()
+#((9 16) (15 17))
+#()
+#()))
+
+
+;;; ***START STATE INDEX
+
+(setq PAREN::*LR-PARSER-START-STATE-INDEX* 0)
+
+
+;;; ***END SYMBOL INDEX***
+
+(setq PAREN::*END-SYMBOL-INDEX* 2)
+
+
+;;; ***LAMBDA FUNCTIONS***
+
+(setq PAREN::*CLIENT-LAMBDAS* 
+(VECTOR #'(LAMBDA (START) START)
+        #'(LAMBDA (PAREN::PKG PAREN::PD PAREN::PS)
+           (DECLARE (IGNORE PAREN::PKG))
+           (PAREN::GENERATE-TABLES-FROM-DECLS-AND-PRODS PAREN::PD PAREN::PS))
+        #'(LAMBDA NIL '(PAREN::IDENTIFIER NUMBER))
+        #'(LAMBDA (PAREN::PT PAREN::IDL) (DECLARE (IGNORE PAREN::PT))
+           PAREN::IDL)
+        #'(LAMBDA NIL (SETF *PACKAGE* (FIND-PACKAGE :USER)) :USER)
+        #'(LAMBDA (KEYWORD PAREN::PKG) (DECLARE (IGNORE KEYWORD))
+           (SETF *PACKAGE* (FIND-PACKAGE PAREN::PKG)) PAREN::PKG)
+        #'(LAMBDA NIL NIL)
+        #'(LAMBDA (PAREN::PS PAREN::P) (APPEND PAREN::PS PAREN::P))
+        #'(LAMBDA
+           (PAREN::PROD PAREN::ID PAREN::ARROW PAREN::IDL PAREN::ACTION
+            PAREN::ACT)
+           (DECLARE (IGNORE PAREN::PROD PAREN::ARROW PAREN::ACTION))
+           `((,PAREN::ID ,@PAREN::IDL) ,PAREN::ACT))
+        #'(LAMBDA (PAREN::PROD PAREN::ID PAREN::ARROW PAREN::IDL)
+           (DECLARE (IGNORE PAREN::ARROW PAREN::PROD))
+           `((,PAREN::ID ,@PAREN::IDL) NIL))
+        #'(LAMBDA (PAREN::IDL) (REVERSE PAREN::IDL))
+        #'(LAMBDA (PAREN::IDL PAREN::ID) (CONS PAREN::ID PAREN::IDL))
+        #'(LAMBDA NIL NIL)))
+
+

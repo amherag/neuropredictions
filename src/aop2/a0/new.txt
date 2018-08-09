@@ -1,0 +1,56 @@
+ 
+What's new in AGENT0 ?
+
+4/29/91  o  Wrote LISP PARSER to parse the new Lisp syntax for AGENT0
+             programs.  See the file joetriv.lisp for an example
+	 o  Wrote a BNF for the new syntax, in file bnf.txt
+         o  Implemented parser for initial beliefs
+         o  New command: 'new' prints this message
+         o  Pressing RETURN while in run mode no longer breaks
+         o  New command: 'go <agent>' makes that agent the current
+             agent (old method of typing agent name alone still works)
+         o  Fixed problem with Allegro Lisp needing initial RETURN
+         o  Changed the name to AGENT0 release 1.0
+
+10/25/91 o  Multiple windows--one for each agent, with buttons (type g)
+         o  Negated message conditions and mental conditions     
+         o  New functions for use in private actions:
+
+            (lisp-parse-query fact)
+               Parses a fact producing a pattern that can be used in
+               the following functions.  Replaces 'now' with the time
+               of execution.  Variables are allowed: just type ?foo to
+               use one.
+
+            (get-belief agent-name pattern)
+               If the named agent has any beliefs which match the
+               pattern, this returns the bindings for variables in the
+               pattern which make it match the first such belief.  If
+               no match is found, this returns fail.  Note that nil
+               means a match was found with no bindings required, not
+               that it failed.
+
+            (get-all-beliefs agent-name pattern)
+               Like get-belief, but returns a list of binding-lists,
+               each of which describes a match against a belief.
+
+            (delete-belief-pattern agent-name pattern &optional bindings)
+               Completely deletes all beliefs matching the pattern
+               from the agent's beliefs database
+
+            (send-inform-message from-name to-name fact)
+            (send-request-message from-name to-name act)
+               These send a message of the appropriate type.
+
+COMING SOMEDAY:
+         o  Sending messages over networks to other lisp processes
+         o  Agents can spawn new agents
+         o  Privacy of function names so different agents can have
+             different private actions with the same name
+         o  Support for negated message conditions and mental conditions
+         o  Actually use the timegrain when running agents
+         o  Better error catching of mistyped commands
+         o  Better time in initial beliefs, better than raw integers
+
+Feedback and bug reports to torrance@ai.mit.edu
+

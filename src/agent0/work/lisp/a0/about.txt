@@ -1,0 +1,18 @@
+ 
+AGENT0 -- An interactive interpreter for programs written in the
+          AGENT0 language as defined in [Shoham 1990], "Agent Oriented
+          Programming", Stanford Technical Report STAN-CS-90-1335.
+
+About the authors:
+
+  Mark C. Torrance is a recent graduate of the Symbolic Systems
+  Program at Stanford.  He is pursuing a PhD in Computer Science at
+  MIT.  He can be reached as torrance@cs.stanford.edu.
+
+  Paul A. Viola has just completed a MS in Computer Science at MIT.
+  He is continuing to work on his PhD.  He is reachable as
+  viola@ai.mit.edu.
+
+For more information about the program, see the manual aopmanual.dvi,
+in a directory near the one where you found the programs.
+ 

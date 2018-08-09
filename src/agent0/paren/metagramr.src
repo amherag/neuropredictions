@@ -1,0 +1,92 @@
+;;; -*- Mode: LISP; Package: ParEn -*-
+
+
+;;;=====================================================================
+;;;
+;;;  		 ParEn (tm) Common LISP Parser Environment
+;;;
+;;;  Unpublished-rights reserved under the copyright laws of the United
+;;;  States.
+;;;  
+;;;  This data and information is proprietary to, and a valuable trade
+;;;  secret of, SRI International.  It is given in confidence by SRI
+;;;  International.  Its use, duplication, or disclosure is subject to
+;;;  the restrictions set forth in the License Agreement under which it
+;;;  has been distributed.
+;;;				    
+;;;
+;;;	    Unpublished Copyright (c) 1987, SRI International
+;;;	         ParEn is a Trademark of SRI International
+;;;
+;;;=====================================================================
+
+
+
+;;;=====================================================================
+;;;		   Meta-Grammar for ParEn System Grammars
+;;;
+;;;		   Stuart M. Shieber and Barney Pell
+;;;
+;;; written: 8/31/87 19:24:06
+;;; 
+;;; Jun  3, 1988 -- Sandy Wells: changed file extensions:
+;;; 	"TABLES" -> "tabl"
+;;; 	"TEMP"	-> "temp"
+;;; Jun 14, 1988 -- SW Added (declare (ignore ...)) to quiet compiler.
+;;;=====================================================================
+
+
+Package 	ParEn
+
+Preterminals 	IDENTIFIER
+
+Production	START -> PACKAGE-DECL PRETERMINAL-DECL PRODS
+Action 		#'(lambda (pkg pd ps) 
+		    (declare (ignore pkg))
+		    (generate-tables-from-decls-and-prods pd ps))
+
+Production	PRETERMINAL-DECL ->
+Action		#'(lambda () '(identifier number))
+
+Production	PRETERMINAL-DECL -> "PRETERMINALS" ID-LIST
+Action		#'(lambda (pt idl)
+		    (declare (ignore pt))
+		    idl)
+
+Production 	PACKAGE-DECL ->
+Action		#'(lambda () 
+		    (setf *package* (find-package :user))
+		    :user)
+
+Production 	PACKAGE-DECL -> "PACKAGE" IDENTIFIER
+Action		#'(lambda (keyword pkg) 
+		    (declare (ignore keyword))
+		    ;; Save away the requested package.
+		    (setf *package* (find-package pkg))
+		    pkg)
+
+Production	PRODS -> 
+Action		#'(lambda () nil)
+
+Production	PRODS -> PRODS PROD
+Action		#'(lambda (ps p) (append ps p))
+
+Production	PROD -> "PRODUCTION" IDENTIFIER "->" ID-LIST 
+			"ACTION" IDENTIFIER
+Action		#'(lambda (prod id arrow idl action act)
+		    (declare (ignore prod arrow action))
+		    `((,id ,@idl) ,act))
+
+Production	PROD -> "PRODUCTION" IDENTIFIER "->" ID-LIST
+Action		#'(lambda (prod id arrow idl)
+		    (declare (ignore arrow prod))
+		    `((,id ,@idl) nil))
+
+Production	ID-LIST -> ID-LIST1
+Action		#'(lambda (idl) (reverse idl))
+
+Production	ID-LIST1 -> ID-LIST1 IDENTIFIER
+Action		#'(lambda (idl id) (cons id idl))
+
+Production	ID-LIST1 ->
+Action		#'(lambda () nil)

@@ -1,0 +1,41 @@
+/*  Agent0 interpreter
+ *  File #1 - Tick handler
+ */
+
+
+
+do_one_agent(Agent) :- read_messages(Agent),
+                       check_degenerate_comt_rules(Agent),
+                       check_commitments(Agent),!.
+
+
+do_all_agents :- who_am_i(Agent),
+                 do_one_agent(Agent),
+                 fail;true.
+
+tick :- update_clock,
+        do_all_agents.
+
+do_simulation :- what_time_is_it(Now),
+                finish_time(Finish),
+                less(Finish,Now).
+
+do_simulation :-tick,
+                update_clock,
+                do_simulation.
+
+
+
+simulate(for,Time) :-
+        update_clock,
+        what_time_is_it(Now),
+        add_time(Now,Time,Finish),
+        asserta(finish_time(Finish)),
+        do_simulation,
+        retract(finish_time(Finish)).
+
+simulate(until,Time) :-
+        update_clock,
+        asserta(finish_time(Time)),
+        do_simulation,
+        retract(finish_time(Finsih)).

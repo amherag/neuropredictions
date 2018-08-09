@@ -1,0 +1,74 @@
+=======================================================================
+
+			 AOP -- New features
+
+=======================================================================
+
+Three valued logic of belief (T, F, U).  Things are initially unknown.
+
+Successfully commits as a result of a commit rule firing when a
+request message is sent.
+
+Asynchronous running (puts an * in front of the prompt)
+
+Changed PRIVATE ACTIONS so the text of the function is not
+passed--just a named call.  No more "agent automatically passed".
+
+Drastically improved print functions associated with commands to the
+<AGENT> prompt.
+
+Fixed so a commitment now gets retracted at the moment it is
+performed.  Problem--what to do when this is the same moment it was
+committed?  We lose the fact that we were ever committed, since the
+negation overwrites it (same time, so F fact-status record takes
+precedence.
+
+
+=======================================================================
+
+		      QUESTIONS to ask AOP group
+
+=======================================================================
+
+Does an "if" get tested at the time of the action contained within it?
+Should IF actions perhaps have a time associated with them?
+(for now, it gets tested at the time of reciept of the message)
+
+Worry about ~CMT(a,b,phi) = B(a,~CMT(a,b,phi))!  This is now broken
+	because of the new "unknown".
+
+Problem--We lose the fact that we were ever committed when the
+commitment is performed (and thus retracted) at the same *now* the
+commitment was asserted, since the negation overwrites it (same time,
+so F fact-status record takes precedence.
+
+
+=======================================================================
+
+			     AOP -- To Do
+
+=======================================================================
+
+Fix so times and agents get bound with bdg-list when committing.
+
+Improve error handling.
+
+Fix private actions so you can use "me" or something when you actually
+want to pass the agent.
+
+Write Lisp parser for whole agent programs so they don't need to use
+  paren at all.
+Write preparser for the old "Prolog form"
+Allow a global *prolog-mode* to specify format for display and parsing
+  of AOP statements.
+Allow individual agent programs to be in either form--specify a flag
+  on the first line of the file?
+
+Fix simulation of global timegrain.
+
+Fix "now" so it always evals to the time of the start of the most
+recent tick (I think this is what we want...).
+
+Allow "unstate" to remove fact-info records.
+
+----

@@ -1,0 +1,54 @@
+/*  This file contains the calls to Quintus prolog libraries
+ *    specifications are given so that replacements can be written
+ */
+
+:- ensure_loaded(library(files)).
+:- ensure_loaded(library(strings)).
+:- ensure_loaded(library(date)).
+
+/*  This is the system call to get the current time.  The call
+ *
+ *   a_datime(A).
+ *
+ * should instatiate A to :
+ *
+ *       date(Year,Month,Date,Hour,Minute,Second)
+ *
+ *     where Year == 0..99   (1987 -> 87)
+ *           Moth == 0..11   (2 -> Mar)
+ *           Date == 1..31   (10 -> 10)  
+ *           Hour == 0..23   (0 -> Midnight, 12 -> Noon)
+ *         Minute == 0..59
+ *         Second == 0..59
+ */
+a_datime(A) :- datime(A).
+
+/* a_concat_atom takes in a list of atoms, and returns
+ * the concatination of the atoms. So, the call
+ *
+ *   a_concat_atom([smith,'.msg'],Atom).
+ *
+ *  should instantiate Atom to
+ *
+ *     Atom = 'smith.agnt'  , and
+ *
+ *   a_concat_atom('smith.',agnt,'.',msg,Atom) should yield :
+ *
+ *    Atom = 'smith.agnt.msg'
+ */
+a_concat_atom(List,Atom) :- concat_atom(List,Atom).
+
+/*
+ *   See Quintus library routines for explicit definitions
+ *    of open_file/3, file_exists/1, write/2, delete_flie/1, and close/1
+ */
+a_open_file(Filename,append,Stream) :- open_file(Filename,append,Stream).
+a_open_file(Filename,write,Stream) :- open_file(Filename,write,Stream).
+
+a_file_exists(Filename) :- file_exists(Filename).
+
+a_write(Stream,Content) :- write(Stream,Content).
+
+a_close(Stream) :- close(Stream).
+
+a_delete_file(Filename) :- delete_file(Filename).

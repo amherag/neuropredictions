@@ -1,0 +1,567 @@
+\relax  % -*- Mode: TEX -*-
+
+\documentstyle[11pt,manual,named]{article}
+
+\textheight 8.25in
+\textwidth 6.5in
+\topmargin 20pt
+\oddsidemargin 0pt
+\evensidemargin 0pt
+
+\parskip=0.1in
+\parindent=0pt
+
+\newcommand{\ca}{{\tt *current-agent*}}
+\newcommand{\aop}{{\bf AOP}}
+\newcommand{\ao}{{\bf AGENT0}}
+
+\title{The AGENT0 Manual}
+\author{Mark C. Torrance \\ Artificial Intelligence Laboratory \\
+	Massachusetts Institute of Technology \\
+	{\tt torrance@ai.mit.edu}} 
+
+\begin{document}
+\newindex{fn}{defun}{Function}
+\newindex{vr}{defvar}{Variable}
+\newindex{mc}{defmacro}{Macro}
+
+\maketitle
+
+\begin{center}
+\parbox{5in}
+{\small This document describes an implementation of \aop, an
+interpreter for programs written in a language called \ao.  \ao\ is a
+first stab at a programming language for the paradigm of
+Agent-Oriented Programming.  It is currently under development at
+Stanford under the direction of Yoav Shoham.  This implementation is
+the work of the author in collaboration with Paul A. Viola, also of
+MIT ({\tt viola@ai.mit.edu}).}
+\end{center}
+
+\section{Introduction}
+
+\aop , {\em Agent Oriented Programming\/}, is a programming paradigm
+proposed by Professor Yoav Shoham of Stanford University.  It imposes
+certain constraints on the nature of agents and of their
+communication.  \ao\ is a more restrictive language, in which programs
+in the spirit of \aop\ can be written.  Both \aop\ and \ao\ are
+described in \cite{shoham90}.
+
+This document describes an implementation of an interpreter for agent
+programs written in the \ao\ language.  This implementation purports to
+be a complete implementation of the \ao\ language as defined in
+Shoham's paper.  This implementation is still under development, but
+the most recent released version should be fairly complete and
+accurately described by this document.
+
+
+\section{Obtaining \ao}
+
+This implementation of \ao\ is written in Common Lisp, and should run
+under any Common Lisp interpreter.  It has been tested under AKCL and
+Allegro Common Lisp, on Sparcstations, Dec Workstations, and Macintosh
+computers.  The code for the interpreter and the simple Command Line
+Interface should be portable to any Common Lisp implementation.  There
+are additional programs which provide a nice Graphical User Interface
+under Xwindows.  This GUI is described in the section {\bf Xwindows
+GUI\/}.
+
+The notation {\tt <a0>} will refer to the directory in which your \ao\
+files are stored.  You should set up such a directory in a convenient
+place, and put all of the \ao\ files there.
+
+If you are a member of the Nobotics group at Stanford, the \ao\ files
+are available in the directory {\tt $\tilde{~}$aop/lisp/a0}.  You
+don't need to copy these; just run them from this directory.
+Hereafter, you should use {\tt $\tilde{~}$aop/lisp/a0} wherever you
+see {\tt <a0>}.
+
+\ao\ is also available on the Andrew File System, a national
+network-transparent filesystem, in the directory {\tt
+/afs/ir.stanford.edu/users/t/torrance/aop}.  Copy all files from this
+directory into a directory (hereafter {\tt <a0>}) on your own machine,
+and change the variable {\tt *aop-load-path*} in {\tt <a0>/load.lisp}
+to point to the place where you put the {\tt <a0>} directory.  This
+pathname should either be absolute for your machine, or relative to
+the {\tt *default-pathname-defaults*} of Lisp as you start it, which
+is the pathname of the directory you are in when you started Lisp.
+
+Finally, \ao\ is available for anonymous ftp from {\tt trix.ai.mit.edu}
+in the directory {\tt pub/aop}.  Make the same changes described in
+the preceding paragraph to get it to run on your installation.
+
+
+\section{Running \ao}
+
+To run \ao , first start up Common Lisp.  The command to do this will
+depend on your system, but could be {\tt cl}, {\tt akcl}, {\tt acl},
+or clicking on an icon for Allegro Common Lisp on a Macintosh.
+
+Next, load the file {\tt <a0>/load} by typing {\tt (load ``load'')} to
+Lisp.  If you were not in the {\tt <a0>} directory when you started
+Lisp, you should type the pathname of that directory to the load
+command, as in {\tt (load ``~aop/lisp/a0/load'')}, which works on
+Nobotics lab machines.
+
+
+\section{The {\tt (aop)} function}
+
+After you have loaded \aop, calling the {\tt (aop)} function will
+start the interpreter's read-eval-print loop.  The prompt will be {\tt
+<AGENT>}, representing the fact that you are ``in the context of'' a
+predefined agent named {\tt agent}.  This agent has no beliefs or
+commitment rules built in.  It is useful mainly as a place from which
+to interact with other agents running under the interpreter.
+
+
+\section{Defining an Agent}
+
+Each agent must have a different name.  The program for an agent named
+{\em agent-name\/} is stored in the file {\tt agent-name.lisp}, and
+consists of a call to the {\bf defagent} macro to define the agent
+followed by ordinary lisp functions which implement private actions.
+This file should be stored in the directory referenced as {\tt
+*aop-agent-path*} in the file {\tt load.lisp}.  If you wish to load
+agents from elsewhere, rebind this variable to point to the directory
+where you store your agents.
+
+The {\bf defagent} macro defines a new agent.
+
+\defmacro{defagent}{name \&key :timegrain :beliefs :commit-rules}
+Defines an agent named {\em name}.  See {\bf BNF} at the end of this
+manual for the structure of the arguments to defagent.  The timegrain
+is not currently used by the interpreter, so just put a value here as
+a placeholder.  {\em beliefs\/} is a list of initial beliefs of the
+agent, and {\em commitrules\/} is a set of commitment rules which
+provides the main program for the agent's behavior.
+
+A sample agent named joetriv has been provided in the {\tt agents}
+directory.  You can examine the file {\tt joetriv.lisp} to get an idea
+of the format of this information.  The next section describes how to
+load an agent such as joetriv into the environment.
+
+\section{Loading an Agent}
+
+To load an agent into the current environment, say an agent named
+joetriv, type {\tt load joetriv} to the {\tt <AGENT>} prompt.  The
+prompt will change to reflect the fact that you are now within the
+context of the agent {\tt joetriv}.  This sets the global variable
+\ca\ to the internal data structure associated with joetriv, so that
+many of the commands understood by the \ao\ main loop will function
+with respect to joetriv.  For example, you could type {\tt state (now
+(alive john))} to assert a fact into joetriv's beliefs.  Or you could
+type {\tt inform agent ((+ now (* 10 m)) (foo a b))} to send an inform
+message from joetriv to agent which says that the proposition {\tt
+(foo a b)} becomes true ten minutes from the time the message is sent.
+
+\begin{figure}
+\begin{tabular}{ll}
+{\tt q} or {\tt quit} or {\tt exit} & leave the \aop\ function \\
+{\tt run}		& begin asynchronous mode \\
+			& (run ticks continuously) \\
+{\tt walk} or {\tt stop} & return to synchronous mode \\
+{\tt <return>}		& on a line by itself, \\
+			& runs one tick in synchronous mode \\
+\\
+{\tt now}		& print the current time in 24-hour format\\
+{\tt load <agent>}	& loads files {\tt <agent>.aop} \\
+&	 and {\tt <agent>.lsp} \\
+{\tt go <agent>}	& make {\tt <agent>} the \ca \\
+\\
+{\tt inform <agent> (TIME PROP)} & \ca\ informs {\tt <agent>}\\
+			& of {\tt <fact>} \\
+{\tt request <agent> <act>} & \ca\ requests {\tt <agent>}\\
+			& to perform {\tt <act>} \\
+\\
+{\tt beliefs}		& list all beliefs of \ca \\
+{\tt cmtrules}		& list all commitment rules of \ca \\
+{\tt incoming}		& list all incoming messages of \ca \\
+			& (to be processed at beginning of next tick)
+\\
+{\tt bel? (TIME PROP)}	& tells whether \ca\ believes {\tt PROP} \\
+			&	 is true at {\tt TIME} \\
+			& ({\tt now} can be used as a {\tt TIME} to indicate \\
+			& the current time. Functions of {\tt now} can also \\
+			& be used, such as {\tt (+ now (* 2 m))} for \\
+			& 2 minutes later than the current time)\\
+\\
+{\tt state (TIME PROP)}	& assert this fact as a belief of \ca \\
+{\tt clrbels}		& remove all beliefs of \ca\ \\
+{\tt cmtrule [ , , , ]} & add a new commit-rule \\
+\\
+{\tt showmsgs}		& turn on display of messages as they are sent \\
+{\tt noshowmsgs}	& turn off display of messages as they are sent \\
+\\
+{\tt <any-lisp-form>}	& let Lisp evaluate {\tt <form>} \\
+
+\end{tabular}
+\caption{Commands for the command-line interface}
+\end{figure}
+
+\section{Beliefs}
+
+An agent's beliefs consist of a set of facts.  Each fact is associated
+with a predicate and a fact-status list.  This list describes the
+truth-values of the fact over time.  An example of a fact-status list
+would be the following:
+
+\begin{verbatim}
+[.. U] [10:00:00 T] [Sun Nov 24 12:00:00 F]
+\end{verbatim}
+
+This indicates that the agent believes the predicate of the fact in
+question became true at 10am today, and will become false at 12 noon
+on Nov 24 of this year.  If you ask this agent whether she believes
+the fact at some time between these two, she will answer {\tt t}; if
+you ask about some time after this range, she will answer {\tt nil};
+if you ask about a time before this range, she will answer {\tt nil}
+both to queries about the fact and to queries about its negation.
+This is because the truth value up until 10am today is ``unknown''.
+
+As described in Yoav's paper, \ao\ agents believe any new fact they
+are told.  Facts, here, are really statements about the status of a
+proposition at a particular time.  These are parsed as statements of
+the form {\tt (TIME (PRED {args}))}, internally called {\tt
+fact-patterns}.  Each typically will give rise to a new fact-status
+record on the fact with the same proposition as was passed in the
+message, time equal to {\tt TIME} (which must be bound), and
+truth-value taken from the presence or absence of a {\tt not} before
+the {\tt PRED}.  Some special statements are allowed in place of {\tt
+TIME} here; see Section~\ref{time} below for details.
+
+
+\section{Commitments}
+
+A commitment is just a particular kind of proposition which is stored
+in an agent's beliefs database.  An agent can come to have a
+commitment either as a result of firing a commitment rule, triggered
+by some incoming request message, by taking the action of committing
+to do some other action, or by simply asserting the commitment into
+his beliefs.  A commitment can be unrequested by the agent to whom it
+is made.  An agent can commit to herself; this is considered a
+``choice''.
+
+Each tick, an agent performs all of her commitments which have
+matured.  A commitment it is unasserted from the beliefs database
+(i.e., asserted with truth-value {\bf FALSE}), at the time the
+commitment is performed.  This gives the agent a record of the time at
+which she actually carried out the commitment.
+
+In the most recent version of the interpreter, commitments are
+performed when the current time is equal to or past the time expressed
+in the action.  This means that when a commitment rule fires and
+installs a commitment, that commitment will get acted upon later that
+same tick if the action refers to the current time or a time in the
+past.  In order to make it possible to reason about things to which an
+agent has been committed in the past, the commitment is actually
+asserted with truth value {\bf FALSE} one second later than the
+current time, so that commitments to immediate action will remain true
+with some duration in the belief history.  This is correct only when
+the time between ticks is more than one second.
+
+
+\section{Capabilities}
+
+The \ao\ specification calls for a database of capabilities to be
+checked against automatically each time an agent considers making a
+commitment.  This current implementation of \ao\ does not include any
+capability database or checking of such a database.
+
+
+\section{Messages}
+
+Agents can send each other {\tt REQUEST} and {\tt INFORM} messages.
+The syntax is as follows:
+
+\begin{verbatim}
+
+<AGENT> inform joetriv (now (i_am_cool))
+
+<AGENT> request joetriv (do (+ now (* 5 m)) (becool))
+
+\end{verbatim}
+
+The ``now'' in the message refers to the moment when the message was
+sent, not the moment when it was received.
+
+Agents can also send messages from within private action functions.
+This facility may be used to, among other things, send multiple
+messages as a result of a single commitment rule firing.  Functions to
+send messages from within private actions are described below in the
+section {\bf Private Actions}.
+
+The next version of this interpreter will include support for a
+standardized message-passing format in terms of files or UNIX sockets,
+so that agents running under this implementation can communicate with
+agents running under other implementations or on other machines.
+
+
+\section{Time}
+\label{time}
+
+\ao\ can be run in either synchronous or asynchronous mode.  The
+guarantee made in general of \ao\ programs is that they keep their
+commitments by the time they mature.  In this implementation, the
+agents always perform their commitments during the first tick which is
+begun after those commitments mature.  If the simulation is being run
+in discrete, user-prompted tick cycles, as it will be when the user
+wants to interactively send messages and inspect agents from the
+command-line interface, then it is up to the user to hit return often
+enough that the agents meet their commitments in a timely manner.  To
+run the simulator in an asynchronous mode, type {\tt run} to the
+prompt.  An asterisk will appear before the prompt to indicate that
+ticks are being run.  To return to the synchronous mode, type {\tt q}
+or {\tt quit} to the prompt.
+
+I have chosen to print real times to varying degrees of specificity,
+depending on how far the time is from the current time.  Thus, if the
+time is in the format {\tt HH:MM:SS}, it is some time during the
+current day, printed in 24-hour time format.  If the time is within
+the next week, and in the same month as the current day, the day of
+the week is given with the time for display purposes.  If it is not,
+but it is within the same year, then all but the year are shown.
+Otherwise, a full display of {\tt DAY MONTH DATE HH:MM:SS YEAR} is
+shown.
+
+When using the Lisp syntax, users specify times by using Lisp
+functions.  These functions will operate on time in the internal
+(integer) format.  So {\tt (+ ?time 30)} is a time 30 seconds later
+than the time to which {\tt ?time} is bound.  Several useful constants
+are defined to make it easier to specify relative times.  These
+include {\tt m} for one minute, {\tt h} for one hour, {\tt day}, {\tt
+week}, and {\tt yr}.  I do not yet provide functions for specifying
+absolute times, but I plan to soon.  For now, you can generate a
+universal time integer by using the Lisp function {\tt
+(encode-universal-time {args})}.  Its syntax is as follows:
+
+\begin{verbatim}
+---------------------------------------------------------------------
+ENCODE-UNIVERSAL-TIME [Function] Args: (second minute hour date month
+year &optional (timezone -9))
+---------------------------------------------------------------------
+\end{verbatim}
+
+The correct time zone to use on the West Coast of the United States is
+7.
+
+Users and agent programs can also use the word {\tt now} to refer to
+the current time.  Thus, statements such as {\tt state ((+ now (* 2
+m)) (i-am-cool))} are acceptable commands to the {\tt <AGENT>} prompt.
+
+
+\section{Private Actions}
+
+Private actions are merely Lisp function calls.  Various functions are
+provided to make it easy to write useful private actions.  These
+functions are detailed here.
+
+\defun{lisp-parse-query}{fact}
+Parses a fact, which may contain references to 'now' or free
+variables, and returns the internal data structure called a pattern.
+You should not need this, since the functions below have been modified
+to call it themselves.  At the time of execution, 'now' will be
+replaced by the current time.
+
+\defun{get-belief}{agent-name pattern}
+A {\em pattern\/} here is just a proposition which may have variables
+for some of its terms.  This function determines whether the pattern
+unifies with any of the beliefs of the agent.  If it does, it returns
+the variable bindings resulting from the first such unification
+(possibly nil).  If it doesn't, it returns fail.  An example of the
+use of this function is {\tt (get-belief 'joetriv '(on ?x ?y))}, which
+could return {\tt ((x . a) (y . b))} indicating that a belief of the
+form {\tt (on a b)} was matched in joetriv's beliefs database.
+
+\defun{get-all-beliefs}{agent-name pattern}
+Returns a list of all binding lists resulting from successful
+unification of the pattern with the beliefs of the agent.  If no
+matches were made, it will return nil, the empty list.  An example of
+the use of this function is {\tt (get-all-beliefs 'joetriv
+(lisp-parse-query '(on ?x ?y)))}, which might return {\tt (((x . a) (y
+. b)) ((x . c) (y . d)))} indicating that beliefs of the form {\tt (on
+a b)} and {\tt (on c d)} were both matched in joetriv's beliefs
+database.
+
+\defun{delete-belief-pattern}{agent-name pattern}
+Completely deletes all beliefs matching the pattern from the agent's
+beliefs database.  Note that this may drastically modify the belief
+structure; use it with discretion.
+
+\defun{send-inform}{from-agent-name to-agent-name fact}
+Sends an inform message to the agent named {\em to-agent-name\/}
+concerning {\em fact\/}.  Not that you do {\em not\/} need to parse
+the {\em fact\/} first with {\bf lisp-parse-fact}.  An example of the
+use of this function is
+\begin{center}
+{\tt (send-inform-message 'me 'you '(now (on a b)))}
+\end{center}
+which sends a message from me to you regarding the truth of the
+proposition {\tt (on a b)} at the time the command is executed.
+
+\defun{send-request}{from-agent-name to-agent-name act}
+Sends a request message to the agent named {\em to-agent-name\/} to
+perform {\em act\/}.  Note that you do {\em not\/} need to parse the
+{\em act\/} first with {\bf lisp-parse-act}.  An example of the use of
+this function is
+\begin{center}
+{\tt (send-request-message 'me 'you '(do now (your-private-action)))}
+\end{center}
+which sends a message from me to you requesting you to perform your
+private action.
+
+\defun{bel?}{agent-name fact}
+This function returns T or NIL depending on whether the agent believes
+the fact.  The fact should be of the form {\tt (time (proposition))}.
+Note that for facts not explicitly in the database at all agents
+believe neither the fact nor its negation.  Note that this function
+does {\em not\/} require you to parse the fact first with {\bf
+lisp-parse-fact}.
+
+\defun{inform}{agent-name predicate time}
+This should really be called ``insert-belief''.  This function
+modifies the beliefs of the named agent without sending an inform
+message.  This modification takes place immediately, and may cause
+unexpected behavior depending on when within the tick it is executed,
+and whether other rules or commitments depend on the belief that was
+changed.  
+
+\defun{inform-fact}{agent-name fact}
+This function also modifies the beliefs of the named agent directly.
+Its only difference is that it takes a fact, rather than separate
+predicate and time.  Note that this function does {\em not\/} require
+you to parse the fact first with {\bf lisp-parse-fact}.
+
+\defun{now}{}
+Returns the current time as an integer.
+
+\defun{time-string}{time}
+Returns a string representing the {\em time\/} in a display format,
+relative to the current time.  May be useful for debugging.
+
+
+\section{Xwindows GUI}
+
+The latest addition to \a0\ is a graphical user interface which runs
+under Xwindows.  To use it, you must be using Lisp with CLX loaded.
+If CLX is not already loaded into your Lisp image, load it before
+loading AOP.  To run the graphics, simply type {\tt g} or {\tt
+graphics} to the {\tt <AGENT>} prompt.  The buttons are fairly
+self-explanatory.
+
+\section{Examples}
+
+For practice, try running through a few examples in \ao\ to get the
+hang of using the interpreter and watching messages.  This is an
+example of an interaction that exercises a subset of the part of \ao\
+which currently works.
+
+\begin{verbatim}
+
+<AGENT> load joetriv
+Defining agent "JOETRIV"
+Parsing file aop/joetriv.aop now
+
+LOADED 
+
+<AGENT> inform joetriv (100 (on a b))  ; This means at time 100, (on a b)
+JOETRIV will be informed next tick.
+
+<JOETRIV> beliefs
+
+<JOETRIV>               ; (press return to run a tick)
+
+<JOETRIV> beliefs
+
+(ON A B)   [.. U] [100 T]
+<JOETRIV> state (200 (not (on a b)))
+Belief added.
+
+<JOETRIV> beliefs
+(ON A B)   [.. U] [100 T] [200 F]
+
+<JOETRIV> bel? (150 (on a b))
+T
+
+<JOETRIV> bel? (-500 (on a b))
+NIL
+
+<JOETRIV> bel? (-500 (not (on a b)))
+NIL
+
+<JOETRIV> agent
+
+<AGENT> inform joetriv (now (i_am_cool))
+JOETRIV will be informed next tick.
+
+<AGENT>
+
+<AGENT> request joetriv (do (+ now m) (i_am_cool))   ; one minute from now
+JOETRIV will be requested next tick.
+
+<AGENT>
+
+<AGENT> run
+
+*<AGENT>          ; * indicates asynchronous mode
+
+	<just under one minute passes>
+
+This is the cool Joe Triv Agent.
+
+q		  ; user types q to quit run-mode
+
+<AGENT> q
+
+<cl>
+
+\end{verbatim}
+
+\begin{figure}
+\begin{verbatim}
+<beliefs>     ::= '(<fact>*) | NIL
+
+<commitrules> ::= '(<commitrule>*) | NIL
+<commitrule>  ::= (<msgcond> <mntlcond> <agent> <action>)
+
+
+<msgcond>     ::= <msgconj>    | (OR <msgconj>*)
+<msgconj>     ::= <msgpattern> | (AND <msgpattern>*)
+<msgpattern>  ::= (<agent> INFORM  <fact>)   |
+                  (<agent> REQUEST <action>) |
+                  (NOT <msgpattern>) | NIL
+
+<mntlcond>    ::= <mntlconj>    | (OR <mntlconj>*)
+<mntlconj>    ::= <mntlpattern> | (AND <mntlpattern>*)
+<mntlpattern> ::= (B <fact>) | (CMT <action>) | (NOT <mntlpattern>) | NIL
+
+<action>      ::= (DO        <time> <privateaction>)  |
+                  (INFORM    <time> <agent> <fact>)   |
+                  (REQUEST   <time> <agent> <action>) |
+                  (UNREQUEST <time> <agent> <action>) |
+                  (REFRAIN   <action>)                |
+                  (IF        <mntlcond> <action>)
+
+<fact>        ::= (<time> (<predicate> <arg>*))
+
+<time>        ::= <integer> | now | <time-constant> |
+                  (+ <time> <time) | (- <time> <time>) |
+                  (* <integer> <time>)   ; Time may be a <variable> when
+                                         ; it appears in a commitment rule
+
+<time-constant> ::= m   |                ; Minute (= 60 sec/min)
+                    h   |                ; Hour   (= 3600 sec/hour)
+                    day |                ; day    (= sec/day)
+                    yr                   ; year   (= sec/year)
+
+<predicate>   ::= <alphanumeric_string>
+<arg>         ::= <alphanumeric_string> | <variable>
+
+<variable>    ::= ?<alphanumeric_string>
+\end{verbatim}
+\caption{BNF for Agent0 Programs}
+\end{figure}
+
+\bibliographystyle{named}
+\bibliography{aop}
+
+\end{document}

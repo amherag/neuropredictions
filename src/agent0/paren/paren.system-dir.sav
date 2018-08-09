@@ -1,0 +1,26 @@
+;;;  -*- Mode: LISP; Base: 10 -*-
+
+;;; Written 9/08/88 18:26:13 by sw,
+;;; while running on Lisp Machine The Joker from FEP0:>Macsyma-I-AI-7-2.load.1
+;;; with Genera 7.2, System 376.158,
+;;; Experimental Logical Pathnames Translation Files NEWEST, Utilities 27.29,
+;;; Server Utilities 28.5, Hardcopy 118.17, Zmail 165.20, LMFS 102.7, Tape 82.18,
+;;; Nsage 27.120, Extended Help 18.4, Documentation Database 62.1,
+;;; Metering Substrate 26.8, Metering 11.2, Hacks 14.1, IP-TCP 67.5, ILA-NFS 11.11,
+;;; 7-2-Patches 1.17, MAC 14.10, TeX-DVI 2.5, QUIC 2.0, IMPRESS 2.0, LPD 2.3,
+;;; Pascal Runtime 20.2, Compiler Tools Package 11.0, Compiler Tools Runtime 21.1,
+;;; Pascal Package 9.0, Syntax Editor Runtime 4.0, TeX-SCT 3.0, TeX-Doc 2.0,
+;;; TeX-Common 2.2, VIRTeX 2.0, TeX 2.0, LaTeX 3.0, SliTeX 3.0, YTeX 2.0, BibTeX 2.2,
+;;; Illustrate 13.2, Macsyma 412.45,
+;;; Experimental The ParEn Common LISP Parser Environment System 1,
+;;; Experimental The ParEn System driver 1, microcode 3640-MIC 420, FEP 127,
+;;; FEP0:>v127-lisp.flod(64), FEP0:>v127-loaders.flod(64), FEP0:>v127-info.flod(64),
+;;; FEP0:>v127-debug.flod(38), Machine serial number 5231.
+
+
+(("PAREN" :LATEST 1)
+ ;; System versions:
+ (1
+  (:|3600|
+   (:COMPONENT-DIRECTORY
+    ("PAREN:PAREN;PATCH;PAREN-1.COMPONENT-DIR" :NEWEST NIL)))))

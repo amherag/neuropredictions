@@ -1,0 +1,38 @@
+PLANE DEMO:
+
+The following agents comprise the Plane demo:
+
+world.lisp
+plane.lisp
+control.lisp
+
+To run the demo, load the three agents.
+The world demo requires macintosh graphics or xwindows
+graphics.
+
+
+Once the agents are loaded, go to the control
+agent.
+
+type
+<CONTROL> request plane (do (+ now m) (be-at 200 100))
+
+then type
+<CONTROL> run
+
+The Plane agent will slowly make its way to the location
+(200,100).  The Plane agent can handle an arbitrary number
+of requests to be at certain locations.  It will commit
+to be anywhere it is requested to be by the control agent
+as long as it believes it is capable of it.  Capability has
+been implemented in this example in the private actions.
+The Plane agent is capable of flying anywhere if it can
+get there by the time it's requested to be there.  In the
+simple case, a plane can't commit to be 500 units away from
+where it is now in one second.  More complicated cases arise
+where a plane can't commit to be one unit away from where it
+is now ten minutes from now, because it has already committed
+to be 400 units away from where it is now 9 minutes and 50 
+seconds from now.  The functions cap-check and capable-of 
+perform these checks.
+

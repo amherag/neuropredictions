@@ -1,0 +1,26 @@
+ 
+What's new in AGENT0 ?
+
+4/29/91  o  Wrote LISP PARSER to parse the new Lisp syntax for AGENT0
+             programs.  See the file joetriv.lisp for an example
+	 o  Wrote a BNF for the new syntax, in file bnf.txt
+         o  Implemented parser for initial beliefs
+         o  New command: 'new' prints this message
+         o  Pressing RETURN while in run mode no longer breaks
+         o  New command: 'go <agent>' makes that agent the current
+             agent (old method of typing agent name alone still works)
+         o  Fixed problem with Allegro Lisp needing initial RETURN
+         o  Changed the name to AGENT0 release 1.0
+
+COMING SOON:
+         o  Multiple windows--one for each agent, with buttons
+         o  Agents can spawn new agents
+         o  Privacy of function names so different agents can have
+             different private actions with the same name
+         o  Support for negated message conditions and mental conditions
+         o  Actually use the timegrain when running agents
+         o  Better error catching of mistyped commands
+         o  Better time in initial beliefs, better than raw integers
+
+Feedback and bug reports to torrance@cs.stanford.edu
+ 

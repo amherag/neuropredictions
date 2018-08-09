@@ -26,7 +26,8 @@
 (defparameter *data-directory*   (merge-pathnames #P"data/" *application-root*))
 
 (defconfig :common
-  `(:databases ((:maindb :sqlite3 :database-name ":memory:"))))
+    `(:error-log #P"/Users/Amherag/predictus-error.log"
+      :databases ((:maindb :sqlite3 :database-name ":memory:"))))
 
 (defconfig |development|
   '())

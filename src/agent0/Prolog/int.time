@@ -1,0 +1,138 @@
+/* Notes:
+
+1]  For this to work, there must be a time_format and a what_time_is_it
+     in the database.
+
+2]  This should work with any time_format and any matching 
+      what_time_is_it
+
+3]  The possible formats are
+
+     a]  an integer
+
+     b] a list of priorities [2,3,1,4,5,6]  (this is the format for the 
+      standard month/day/year/hours/minutes/seconds )
+
+4]  The utilities that are mean to be used by outside units are
+     update_clock ()  --> this takes no parameters and should update the
+     clock to the current time
+
+     add_time(Time1,Time2,Result)  -->  This adds two times together.  ( IN
+     the normal way if Time1 and Time2 are integers and if Time1=
+     [x1....xn] and Time2 is [y1.....yn] then Result will be bound to
+     [(x1+y1).....(xn+yn)]. )  There are two important exceptions here.  
+     If Time1 is an integer and Time2 is a list then Time1 is added
+     to the smallest timegrain in Time2.  If Time1 is a list two long
+    [W,O] and Time2 is a list but is not two long, then W is the index
+     and O is the offset as mentioned above.
+
+     less(Time1,Time2)  --> this should work on any pair of times in the 
+     same format. (Remember, the format has to be set.)
+
+     InRange(Time1,Time2,test)  --> this will return true if test is greater
+     than Time1 and less than Time2.
+
+*/
+
+
+setup :- assert(timeformat([2,3,1,4,5,6])),
+     assert(what_time_is_it([0,0,0,0,0,0])).
+
+:- setup.
+
+makelist(List,N) :- equal(N,0), append([],[],List).
+
+makelist(List,N):- N1 is N -1, makelist(Temp,N1), append(Temp,[N],List).
+
+update_clock :- retract(what_time_is_it(X)),
+     a_datime(date(Y,M,D,H,Mn,S)),
+     assert(what_time_is_it([M,D,Y,H,Mn,S])).
+
+addonetimeunit([H|T],Result) :- timeformat(Y),
+     length([H|T],N), N1 is N -1, 
+     reorder([H|T],R1,Y),
+     add_time([N1,1],R1,R2),
+     makelist(List,N),
+     reorder(List,NewFormat,Y),
+     reorder(R2,Result,NewFormat).
+
+addonetimeunit(Time,Result) :- integer(Time), Result is Time +1.
+
+
+/*  This addes two integer times     */
+add_time(Time1,Time2,Result) :- integer(Time1),
+     integer(Time2),
+     Result is Time1+Time2 .
+
+
+/*These rules add two lists together such that if the two 
+lists are [x1,..,xn] and [y1,..,yn] (they must be of the same 
+length !) then the rules binds Result to [x1+y1,...,xn+yn]   */
+/*-------------------------------------------------*/
+add_time([ ],[ ],Result) :- append([ ],[ ],Result).
+
+
+add_time([W,O],[H|T],Result) :- timeformat(X), 
+     length([W,O],N),
+     length(X, N1),
+     not(equal(N,N1)),
+     addtimespecial(W,O,[H|T],Result).
+
+
+add_time([H1|T1],[H2|T2],Result) :- add_time(H1,H2,R1),
+     add_time(T1,T2,R2),
+     append([R1],R2,Result).
+
+/*--------------------------------------------------*/
+/*This adds an offset to the first field of a list.  In general
+this should be improved so that the Rules gets an offset and 
+a field number (N) and adds that offset to the Nth field of the list.   */
+/*-----------------------------------------------*/
+add_time(Offset,[H|T],Result) :- integer(Offset),
+     add_time(Offset,H,R1),
+     append([R1],T,Result).
+
+addtimespecial(Where,Offset,[H|T],Result) :- equal(Where,0), 
+     add_time(Offset,[H|T],Result).
+
+addtimespecial(Where,Offset,[H|T],Result) :- not(equal(Where,0)),  
+     Wherenew is Where -1,
+     addtimespecial(Wherenew,Offset,T,R1),
+     append([H],R1,Result).
+
+
+/*----------------------------------------------*/
+/* This deals with compairing times. Pretty obvious  */
+/*-------------------------------------------------*/
+equal(A,A).
+equal([H|T],[H1|T1]) :- equal(H,H1), equal(T,T1).
+
+less(A,B) :- integer(A),integer(B), A<B.
+less([H|T],[P|Q]) :- timeformat(Y),
+                     reorder([H|T],R1,Y), 
+                     reorder([P|Q],R2,Y),!, lessreal(R1,R2).
+
+lessreal(A,B) :- integer(A), integer(B), A<B.
+lessreal([H|T],[P|Q]) :- less(H,P).
+lessreal([H|T],[P|Q]) :- equal(H,P), lessreal(T,Q).
+/*--------------------------------------------------*/
+
+reorder([M,D,Y,H,Mn,S],[Y,M,D,H,Mn,S],[2,3,1,4,5,6]).
+
+reorder(List,End,[H|T]) :-length(List,N),
+     append([],[],Result),
+     doreorder(List,Result,N,[H|T],End).
+
+doreorder(List,Result,N,Format,End) :- equal(N,0), equal(Result,End).
+
+doreorder([LH|LT],Result,N,[FH|FT],End) :- not(equal(N,0)),
+     equal(N,FH),
+     N1 is N - 1,
+     append([LH],Result,R1),
+     doreorder(LT,R1,N1,FT,End).
+
+doreorder([LH|LT],Result,N,[FH|FT],End) :- not(equal(N,0)),
+     not(equal(N,FH)),
+     append(LT,[LH],Temp),
+     append(FT,[FH],FTemp),
+     doreorder(Temp,Result,N,FTemp,End).

@@ -1,0 +1,7 @@
+:- ensure_loaded('int.chng').
+:- ensure_loaded('int.bel').
+:- ensure_loaded('int.com').
+:- ensure_loaded('int.msg').
+:- ensure_loaded('int.tick').
+:- ensure_loaded('int.time').
+:- ensure_loaded('int.not').

@@ -1,0 +1,17 @@
+who_am_i(greeter).
+
+:- assert(b(greeter,myfriend(smith),[[[0,0,91,0,0,0],t]])).
+
+can(greeter,do(Time,sayhi)).
+can(greeter,do(Time,sayhowdy)).
+can(greeter,inform(A,B,C)).
+can(greeter,request(A,B,C)).
+can(greeter,refrain(A,B,C)).
+
+commit(greeter,[A,request,do(Time,sayhi)],[],A,do(Time,sayhi)).
+
+commit(greeter,[A,request,B],b([[0,1,91,0,0,0],myfriend(A)]),A,B).
+
+sayhowdy :- write('Howdy!'),nl.
+
+sayhi :- write('Hi there'),nl.

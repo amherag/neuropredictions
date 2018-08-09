@@ -1,0 +1,65 @@
+
+======================================================================
+				 BNF
+			for AGENT0 interpreter
+			 by  Mark C. Torrance
+======================================================================
+
+DEFAGENT is a lisp function understood by the interpreter.
+Define your agent by putting a single DEFAGENT form into a file, along
+with any auxiliary functions you write to implement private actions.
+Name the file <agent-name>.lisp, and put it in the directory
+referenced as *aop-agent-path* in the file "load.lisp".  If you wish
+to load it from elsewhere, rebind this variable to point to the
+location of your agents directory.
+
+
+(defagent
+  :timegrain     <integer>
+  :beliefs       <beliefs>
+  :commit-rules  <commitrules>
+  )
+
+
+**  Note carefully the need for a single quote before the beliefs and
+    commit-rules fields:
+
+<beliefs>     ::= '(<fact>*) | NIL
+
+<commitrules> ::= '(<commitrule>*) | NIL
+<commitrule>  ::= (<msgcond> <mntlcond> <agent> <action>)
+
+
+<msgcond>     ::= <msgconj>    | (OR <msgconj>*)
+<msgconj>     ::= <msgpattern> | (AND <msgpattern>*)
+<msgpattern>  ::= (<agent> INFORM  <fact>)   |
+                  (<agent> REQUEST <action>) |
+                  (NOT <msgpattern>) | NIL
+
+<mntlcond>    ::= <mntlconj>    | (OR <mntlconj>*)
+<mntlconj>    ::= <mntlpattern> | (AND <mntlpattern>*)
+<mntlpattern> ::= (B <fact>) | (CMT <action>) | (NOT <mntlpattern>) | NIL
+
+<action>      ::= (DO        <time> <privateaction>)  |
+                  (INFORM    <time> <agent> <fact>)   |
+                  (REQUEST   <time> <agent> <action>) |
+                  (UNREQUEST <time> <agent> <action>) |
+                  (REFRAIN   <action>)                |
+                  (IF        <mntlcond> <action>)
+
+<fact>        ::= (<time> (<predicate> <arg>*))
+
+<time>        ::= <integer> | now | <time-constant> |
+                  (+ <time> <time) | (- <time> <time>) |
+                  (* <integer> <time>)   ; Time may be a <variable> when
+                                         ; it appears in a commitment rule
+
+<time-constant> ::= m   |                ; Minute (= 60 sec/min)
+                    h   |                ; Hour   (= 3600 sec/hour)
+                    day |                ; day    (= sec/day)
+                    yr                   ; year   (= sec/year)
+
+<predicate>   ::= <alphanumeric_string>
+<arg>         ::= <alphanumeric_string> | <variable>
+
+<variable>    ::= ?<alphanumeric_string>
