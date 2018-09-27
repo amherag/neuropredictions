@@ -6,10 +6,12 @@
   :commit-rules
   '(
 
-   ((?agent REQUEST (if (b (?time (?fact))) (do ?time2 (?action))))
-    ()
-    ?agent
-    (if (b (?time (?fact))) (do ?time2 (?action))) )
+    (
+     (?agent REQUEST (if (b (?time (?fact))) (do ?time2 (?action))))
+     ()
+     ?agent
+     (if (b (?time (?fact))) (do ?time2 (?action)))
+     )
 )
 )
 

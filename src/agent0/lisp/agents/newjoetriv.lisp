@@ -14,8 +14,10 @@
 
 (defagent joetriv
     :timegrain 10			; in seconds (not used yet)
-    :beliefs '((2881906857 (i_am_cool))
-	       (2881906857 (on a b)))
+    ;; :beliefs '((2881906857 (i_am_cool))
+    ;;            (2881906857 (on a b)))
+    :beliefs '((now (i_am_cool))
+	       (now (on a b)))
     :commit-rules
     '( ((or (and (?agent1 REQUEST (DO ?time (behot)))
 		 (?agent1 REQUEST (DO ?time2 (betepid))))
@@ -24,7 +26,6 @@
 	?agent1
 	(do ?time (becool))) )
     )
-
 
 ;;;  PRIVATE ACTIONS
 ;;;

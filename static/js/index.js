@@ -1,4 +1,142 @@
 $(document).ready(()=>{
+  // load timeframes according to membership level
+  var key = document.getElementById('key').value
+  
+  $.ajax({
+    url: '/levelpairs/' + key,
+    method: "GET",
+    dataType: "json",
+    beforeSend: () => {
+      $('#loading').show()
+    },
+    complete: () => {
+      $('#loading').hide()
+    },
+    success: (res) => {
+      res.forEach((pair) => {
+        pair = pair.toUpperCase()
+
+        var o = new Option(pair.replace(/_/g, "/"), pair);
+        if (pair == "EUR_USD") {
+          o.selected = true
+        }
+        
+        /// jquerify the DOM object 'o' so we can use the html method
+        $(o).html(pair.replace(/_/g, "/"));
+        $("#pair").append(o);
+      })
+    },
+    error: (req, status, err) => {
+      console.log(req)
+      console.log(status)
+    }
+  });
+  
+  // load markets according to membership level
+  $.ajax({
+    url: '/levelgranularity/' + key,
+    method: "GET",
+    dataType: "json",
+    beforeSend: () => {
+      $('#loading').show()
+    },
+    complete: () => {
+      $('#loading').hide()
+    },
+    success: (res) => {
+      res.forEach((tf) => {
+
+        tf = tf.toUpperCase()
+
+        "s5","s10","s15","s30","m1","m2","m3","m4","m5","m10","m15","m30","h1","h2","h3","h4","h6","h8","h12","d","w","m"
+
+        var formattedTF
+        
+        switch (tf) {
+          case "S5":
+            formattedTF = "5 seconds"
+            break
+          case "S10":
+            formattedTF = "10 seconds"
+            break
+          case "S15":
+            formattedTF = "15 seconds"
+            break
+          case "S30":
+            formattedTF = "30 seconds"
+            break
+          case "M1":
+            formattedTF = "1 minute"
+            break
+          case "M2":
+            formattedTF = "2 minutes"
+            break
+          case "M3":
+            formattedTF = "3 minutes"
+            break
+          case "M4":
+            formattedTF = "4 minutes"
+            break
+          case "M5":
+            formattedTF = "5 minutes"
+            break
+          case "M10":
+            formattedTF = "10 minutes"
+            break
+          case "M15":
+            formattedTF = "15 minutes"
+            break
+          case "M30":
+            formattedTF = "30 minutes"
+            break
+          case "H1":
+            formattedTF = "1 hour"
+            break
+          case "H2":
+            formattedTF = "2 hours"
+            break
+          case "H3":
+            formattedTF = "3 hours"
+            break
+          case "H4":
+            formattedTF = "4 hours"
+            break
+          case "H6":
+            formattedTF = "6 hours"
+            break
+          case "H8":
+            formattedTF = "8 hours"
+            break
+          case "H12":
+            formattedTF = "12 hours"
+            break
+          case "D":
+            formattedTF = "1 day"
+            break
+          case "W":
+            formattedTF = "1 week"
+            break
+          case "M":
+            formattedTF = "1 month"
+            break
+        }
+
+        var o = new Option(formattedTF, tf);
+        if (tf == "H1") {
+          o.selected = true
+        }
+        
+        /// jquerify the DOM object 'o' so we can use the html method
+        $(o).html(formattedTF);
+        $("#tf").append(o);
+      })
+    },
+    error: (req, status, err) => {
+      console.log(req)
+      console.log(status)
+    }
+  });
+  
   let x, y, z, opens, highs, lows, closes;
   
   x = [];
