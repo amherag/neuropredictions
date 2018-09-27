@@ -355,9 +355,9 @@
 
 (defroute ("/heatmap/:key/:pair/:granularity" :method :get) (&key key pair granularity)  
   (ignore-errors
-    ;; (if *full-queue*
-    ;;     (loop do (sleep 0.0) while *full-queue*))
-    ;; (setf *full-queue* t)
+    (if *full-queue*
+        (loop do (sleep 0.0) while *full-queue*))
+    (setf *full-queue* t)
     (if (find key *keys* :test #'string=)
         (let ((pair (read-from-string (format nil ":~a" pair)))
               (granularity (read-from-string (format nil ":~a" granularity)))
