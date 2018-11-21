@@ -248,107 +248,107 @@
       </div>
 
     </div><!-- row -->
-    </div><!-- container -->
-    
-    <!-- loading animation -->
-    <div class="container" style="text-align: center;">
-      <div id="loading" class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
-    </div>
+</div><!-- container -->
+
+<!-- loading animation -->
+<div class="container" style="text-align: center;">
+  <div id="loading" class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+</div>
 
 
 
 
-    <!-- The export layouts modal -->
-    <div class="modal fade" id="exportLayoutsModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title" id="modalLabel">Layouts' code</h4>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <p>Select all, copy and store somewhere this code</p>
-            <textarea id="exportLayoutsContent" style="width: 100%;"></textarea>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          </div>
-        </div>
+<!-- The export layouts modal -->
+<div class="modal fade" id="exportLayoutsModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="modalLabel">Layouts' code</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Select all, copy and store somewhere this code</p>
+        <textarea id="exportLayoutsContent" style="width: 100%;"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>
+  </div>
+</div>
 
 
-    <!-- The import layouts modal -->
-    <div class="modal fade" id="importLayoutsModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title" id="modalLabel">Layouts' code</h4>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <p>Paste the code representing your layouts below, and then click on "Import"</p>
-            <textarea id="importLayoutsContent" style="width: 100%;"></textarea>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="importLayouts()">Import</button>
-          </div>
-        </div>
+<!-- The import layouts modal -->
+<div class="modal fade" id="importLayoutsModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="modalLabel">Layouts' code</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Paste the code representing your layouts below, and then click on "Import"</p>
+        <textarea id="importLayoutsContent" style="width: 100%;"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="importLayouts()">Import</button>
       </div>
     </div>
-
-    
-
-    <div class="container-fluid" id="charts">
-    </div>
-
-    <script type="text/javascript">
-     function loadStuff () {
-       var key = document.getElementById('key').value
-       var pair = document.getElementById('pair').value
-       // var tf = document.getElementById('tf').value
-       var timeframes = $('#tf').val()
-
-       timeframes.forEach((tf) => {
-         var params = key + "/" + pair +"/" + tf
-         var id = params + Math.random()
-
-         
-         var row = document.createElement('div')
-         row.classList.add('row')
-         var chart = document.createElement('div')
-         chart.id = id
-         chart.classList.add('col-lg-12')
-
-         row.appendChild(chart)
-
-         document.getElementById('charts').appendChild(row)
+  </div>
+</div>
 
 
 
-         chartsLayout.push({
-           pair: pair,
-           timeframe: tf
-         })
+<div class="container-fluid" id="charts">
+</div>
 
-         fetchDataTest("/heatmap/"+ params, id, pair + " " + tf)
-       })
-     }
-    </script>
+<script type="text/javascript">
+ function loadStuff () {
+   var key = document.getElementById('key').value
+   var pair = document.getElementById('pair').value
+   // var tf = document.getElementById('tf').value
+   var timeframes = $('#tf').val()
 
-    <script type="text/javascript" src="/js/jquery.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-    
+   timeframes.forEach((tf) => {
+     var params = key + "/" + pair +"/" + tf
+     var id = params + Math.random()
 
-    
-    <script type="text/javascript" src="/js/plotly-latest.min.js"></script>
-    <script type="text/javascript" src="/js/index.js"></script>
+     
+     var row = document.createElement('div')
+     row.classList.add('row')
+     var chart = document.createElement('div')
+     chart.id = id
+     chart.classList.add('col-lg-12')
+
+     row.appendChild(chart)
+
+     document.getElementById('charts').appendChild(row)
+
+
+
+     chartsLayout.push({
+       pair: pair,
+       timeframe: tf
+     })
+
+     fetchDataTest("/heatmap/"+ params, id, pair + " " + tf)
+   })
+ }
+</script>
+
+<script type="text/javascript" src="/js/jquery.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/plotly-latest.min.js"></script>
+<script type="text/javascript" src="/js/index.js"></script>
   </body>
 </html>

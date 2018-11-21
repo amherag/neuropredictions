@@ -6,6 +6,7 @@
   (:export :*bests*
            :get-results
            :get-trades
+	   :get-transactions
            :get-rates
            :get-data
            :load-data))
@@ -98,15 +99,14 @@
                          (concatenate 'list pre-result (list howmany))))))
     result))
 
-
 (let ((queue 0))
-(defun get-rates (instrument howmany-batches granularity)
-  "Gathers prices from Oanda.
+  (defun get-rates (instrument howmany-batches granularity)
+    "Gathers prices from Oanda.
 A batch = 5,000 rates."
-  (labels ((recur (end result counter)
-             (let ((candles (ignore-errors
-                              (rest (assoc :candles (cl-json:decode-json-from-string
-                                                     (dex:get #"https://api-fxtrade.oanda.com/v1/candles?\
+    (labels ((recur (end result counter)
+               (let ((candles (ignore-errors
+                                (rest (assoc :candles (cl-json:decode-json-from-string
+                                                       (dex:get #"https://api-fxtrade.oanda.com/v1/candles?\
 instrument=${instrument}&\
 granularity=${granularity}&\
 count=500&\
@@ -114,26 +114,68 @@ end=${end}&\
 dailyAlignment=0&\
 candleFormat=bidask&\
 alignmentTimezone=America%2FNew_York"
-                                                              :insecure t
-                                                              :headers '(("X-Accept-Datetime-Format" . "UNIX")))))))))
-               (sleep 0.5)
-               (if (and candles (< counter howmany-batches))
-                   (recur (read-from-string
-                           (rest (assoc :time (first candles))))
-                          (append (map (lm (candle)
-                                         (list (assoc :close-bid candle)
-                                               (assoc :open-bid candle)
-                                               (assoc :high-bid candle)
-                                               (assoc :low-bid candle)
-                                               (assoc :time candle)))
-                                       candles)
-                                  result)
-                          (incf counter))
-                   result))))
+                                                                :insecure t
+                                                                :headers '(("X-Accept-Datetime-Format" . "UNIX")))))))))
+                 (sleep 0.5)
+                 (if (and candles (< counter howmany-batches))
+                     (recur (read-from-string
+                             (rest (assoc :time (first candles))))
+                            (append (map (lm (candle)
+                                           (list (assoc :close-bid candle)
+                                                 (assoc :open-bid candle)
+                                                 (assoc :high-bid candle)
+                                                 (assoc :low-bid candle)
+                                                 (assoc :time candle)))
+                                         candles)
+                                    result)
+                            (incf counter))
+                     result))))
   
-    (recur (* (local-time:timestamp-to-unix (local-time:now)) 1000000)
-           nil
-           0))))
+      (recur (* (local-time:timestamp-to-unix (local-time:now)) 1000000)
+             nil
+             0))))
+
+(defparameter *token* "de8e7e8fa3f2aee852772a4e30fcb345-1bba364396f84ea1be723f26c4291b9f")
+(defparameter *account* "001-004-1544726-003")
+
+;; (local-time:timestamp- (local-time:now) 1 :month)
+
+(defun get-transactions ()
+  (let* ((headers `(("Authorization" . ,#"Bearer ${*token*}")
+		    ;; ("X-Accept-Datetime-Format" . "UNIX")
+		    ("Content-Type" . "application/json")))
+	 (from (local-time:parse-timestring "2018-11-20"))
+	 (page (cadr (assoc :pages (cl-json:decode-json-from-string
+				    (dex:get #"https://api-fxtrade.oanda.com/v3/accounts/${*account*}/transactions?\
+from=${from}"
+					     :insecure t
+					     :headers headers)))))
+	 (transactions (cl-json:decode-json-from-string
+			(dex:get page
+				 :insecure t
+				 :headers headers)))
+	 )
+    (remove nil
+	    (map (lm (trans)
+    		   (if (string= (cdr (assoc :type trans)) "ORDER_FILL")
+		       (let ((instrument (assoc :instrument trans))
+			     (units (assoc :units trans))
+			     (price (assoc :price trans))
+			     (account-balance (assoc :account-balance trans))
+			     (pl (assoc :realized-+pl+ (cadr (assoc :trades-closed trans))))
+			     (time (assoc :time trans))
+			     )
+			 ;; `(:instrument ,instrument :units ,units :price ,price
+			 ;; 	       :account-balance ,account-balance :units ,units :time ,time)
+			 ;; (alexandria:flatten
+			 ;;  (list instrument units price account-balance units pl time))
+			 (list instrument units price account-balance units pl time)
+			 ))
+		   )
+    		 (cdr (assoc :transactions transactions))))
+    ))
+
+;; (get-transactions)
 
 ;; (get-rates :EUR_USD 1 :M5)
 
@@ -160,16 +202,24 @@ alignmentTimezone=America%2FNew_York"
               (rest closes))
          )))
 
-(defun fibos (diffs)
+(defun fibos (diffs levels)
   "Returns fibos from bigger to smaller."
   (sort (flatten (map (lm (diff)
                         (let ((price (first diff))
                               (delta (rest diff)))
-                          (list (+ price (* delta 0.382))
-                                (+ price (* delta 0.618))
-                                (+ price (* delta 1.000))
-                                (+ price (* delta 1.618))
-                                )))
+                          ;; (list (+ price (* delta 0.382))
+                          ;;       (+ price (* delta 0.618))
+                          ;;       (+ price (* delta 1.000))
+                          ;;       (+ price (* delta 1.618))
+                          ;;       )
+                          (map (lm (level)
+                                 (+ price (* delta level)))
+                               levels)
+                          ;; (list (+ price (* delta (nth levels 0)))
+                          ;;       (+ price (* delta (nth levels 1)))
+                          ;;       (+ price (* delta (nth levels 2)))
+                          ;;       (+ price (* delta (nth levels 3))))
+                          ))
                       diffs))
         #'>))
 
@@ -601,7 +651,7 @@ alignmentTimezone=America%2FNew_York"
 
 (defparameter *howmany* 100)
 ;; (get-data :EUR_USD (get-rates :EUR_USD 1 :M5))
-(defun get-data (instrument rates)
+(defun get-data (instrument rates &key (levels '(0.382 0.5 0.618 1 1.618)))
   (let* ((partition-size 20)
          (sample-size (- (length rates)
                          partition-size))
@@ -632,7 +682,7 @@ alignmentTimezone=America%2FNew_York"
                        ;;          :heat fibs)
                        )
                      (map (lm (diffs)
-                            (let ((fibos (fibos diffs)))
+                            (let ((fibos (fibos diffs levels)))
                               (if fibos
                                   (heatmap-values fibos area-position))
                               )

@@ -42,6 +42,7 @@
                  (:file "view" :depends-on ("config"))
                  (:file "db" :depends-on ("config"))
                  (:file "config")
-                 (:file "predict"))))
+                 (:file "predict")
+                 (:file "agents" :depends-on ("predict")))))
   :description ""
   :in-order-to ((test-op (load-op neuropredictions-test))))
