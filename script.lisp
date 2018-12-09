@@ -7,7 +7,7 @@
 ;; (push "C:/Users/Amaury/Dropbox/hacking/cl/neuropredictions/" asdf:*central-registry*)
 
 (ql:quickload :neuropredictions)
-(neuropredictions:start :port 8080)
+(neuropredictions:start :port 2001)
 
 (quote
  (with-open-file (out #P "/tmp/daemonlog" :direction :output :if-exists :supersede)

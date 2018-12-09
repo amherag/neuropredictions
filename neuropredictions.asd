@@ -25,6 +25,9 @@
                :cl-json
                ;; :clml
                :fare-memoization
+
+	       ;; better random
+	       :random-state
                
                ;; for @route annotation
                :cl-syntax-annot
@@ -43,6 +46,7 @@
                  (:file "db" :depends-on ("config"))
                  (:file "config")
                  (:file "predict")
+		 (:file "ga")
                  (:file "agents" :depends-on ("predict")))))
   :description ""
   :in-order-to ((test-op (load-op neuropredictions-test))))

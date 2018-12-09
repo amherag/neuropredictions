@@ -1,6 +1,6 @@
 (in-package :cl-user)
 (defpackage neuropredictions.config
-  (:use :cl)
+  (:use :cl :random-state)
   (:import-from :envy
                 :config-env-var
                 :defconfig)
@@ -10,10 +10,13 @@
            :*template-directory*
            :*plots-directory*
            :*data-directory*
+	   :*rand-gen*
            :appenv
            :developmentp
            :productionp))
 (in-package :neuropredictions.config)
+
+(defparameter *rand-gen* (make-generator :mersenne-twister-32))
 
 (setf (config-env-var) "APP_ENV")
 
