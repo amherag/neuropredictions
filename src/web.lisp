@@ -28,7 +28,7 @@
 ;;
 ;; Routing rules
 
-(defroute ("/neuroapp/(.+?\\.html)" :regexp t) (&key captures)
+(defroute ("/(.+?\\.html)" :regexp t) (&key captures)
   (render (pathname (apply #'concatenate 'string captures))))
 
 ;; (defroute ("/(.+?\\.js)" :regexp t) (&key captures)
@@ -275,11 +275,11 @@
 ;;      :M '(:bronze :silver :gold :platinum)
 ;;      ))
 
-(defroute ("/neuroapp/transactions" :method :get) ()
+(defroute ("/transactions" :method :get) ()
     ;; (render-json (cl-json:encode-json-to-string (get-transactions)))
   (render-json (get-transactions)))
 
-(defroute ("/neuroapp/heatmap/:key/:pair/:granularity" :method :get) (&key key pair granularity)  
+(defroute ("/heatmap/:key/:pair/:granularity" :method :get) (&key key pair granularity)  
   (ignore-errors
     (if *full-queue*
         (loop do (sleep 0.0) while *full-queue*))
@@ -303,7 +303,7 @@
     )
   )
 
-(defroute ("/neuroapp/levelpairs/:key" :method :get) (&key key)
+(defroute ("/levelpairs/:key" :method :get) (&key key)
   (ignore-errors
     (if (find key *keys* :test #'string=)
         (let ((level (gethash key *key-levels*)))
@@ -318,7 +318,7 @@
           )
         (render-json "{}"))))
 
-(defroute ("/neuroapp/levelgranularity/:key" :method :get) (&key key)
+(defroute ("/levelgranularity/:key" :method :get) (&key key)
   (ignore-errors
     (if (find key *keys* :test #'string=)
         (let ((level (gethash key *key-levels*)))
@@ -425,7 +425,7 @@
             *keys*)
     keys))
 
-(defroute "/neuroapp/:key" (&key key)
+(defroute "/:key" (&key key)
   (ignore-errors
     (if (find key *keys* :test #'string=)
         (render #P"index.html" `(:key ,key)))
