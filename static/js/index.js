@@ -447,7 +447,7 @@ function refreshLayout () {
 
     
     
-    fetchDataTest("/heatmap/"+ params, id, pair + " " + tf)
+    fetchDataTest("/neuroapp/heatmap/"+ params, id, pair + " " + tf)
   })
 }
 
@@ -479,7 +479,7 @@ function loadLayout (layoutName) {
 
         
         
-        fetchDataTest("/heatmap/"+ params, id, pair + " " + tf)
+        fetchDataTest("/neuroapp/heatmap/"+ params, id, pair + " " + tf)
       })
     }
   })

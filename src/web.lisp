@@ -461,5 +461,3 @@
 
 ;; (ql-dist:install-dist "http://dists.cl21.org/cl21.txt")
 ;; (ql:update-all-dists)
-
-
