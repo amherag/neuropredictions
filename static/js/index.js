@@ -3,7 +3,7 @@ $(document).ready(()=>{
   var key = document.getElementById('key').value
   
   $.ajax({
-    url: '/levelpairs/' + key,
+    url: '/neuroapp/levelpairs/' + key,
     method: "GET",
     dataType: "json",
     beforeSend: () => {
@@ -34,7 +34,7 @@ $(document).ready(()=>{
   
   // load markets according to membership level
   $.ajax({
-    url: '/levelgranularity/' + key,
+    url: '/neuroapp/levelgranularity/' + key,
     method: "GET",
     dataType: "json",
     beforeSend: () => {
