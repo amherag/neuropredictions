@@ -155,7 +155,8 @@ from=${from}"
 				 :insecure t
 				 :headers headers)))
 	 )
-    (remove nil
+    (reverse
+     (remove nil
 	    (map (lm (trans)
     		   (if (string= (cdr (assoc :type trans)) "ORDER_FILL")
 		       (let ((instrument (assoc :instrument trans))
@@ -172,7 +173,7 @@ from=${from}"
 			 (list instrument units price account-balance units pl time)
 			 ))
 		   )
-    		 (cdr (assoc :transactions transactions))))
+    		 (cdr (assoc :transactions transactions)))))
     ))
 
 ;; (get-transactions)
