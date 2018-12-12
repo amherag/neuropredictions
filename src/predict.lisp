@@ -140,11 +140,6 @@ alignmentTimezone=America%2FNew_York"
 
 ;; (local-time:timestamp- (local-time:now) 1 :month)
 
-(local-time:parse-timestring "2018-11-20")
-(local-time:format-timestring "2018-11-20T09:56:56.653074451Z")
-(local-time:format-timestring nil (local-time:parse-timestring time)
-			      :format '(:year "-" :month "-" :day " " :hour ":" :min ":" :sec))
-
 (defun get-transactions ()
   (let* ((headers `(("Authorization" . ,#"Bearer ${*token*}")
 		    ;; ("X-Accept-Datetime-Format" . "UNIX")
@@ -169,8 +164,9 @@ from=${from}"
 				(price (assoc :price trans))
 				(account-balance (assoc :account-balance trans))
 				(pl (assoc :realized-+pl+ (cadr (assoc :trades-closed trans))))
-				(time (local-time:format-timestring nil (local-time:parse-timestring (assoc :time trans))
-								    :format '(:year "-" :month "-" :day " " :hour ":" :min ":" :sec)))
+				;; (time (assoc :time trans))
+				(time `(:time . ,(local-time:format-timestring nil (local-time:parse-timestring (cdr (assoc :time trans)))
+								    :format '(:year "-" :month "-" :day " " :hour ":" :min ":" :sec))))
 				
 				)
 			    ;; `(:instrument ,instrument :units ,units :price ,price
