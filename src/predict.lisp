@@ -140,6 +140,11 @@ alignmentTimezone=America%2FNew_York"
 
 ;; (local-time:timestamp- (local-time:now) 1 :month)
 
+(local-time:parse-timestring "2018-11-20")
+(local-time:format-timestring "2018-11-20T09:56:56.653074451Z")
+(local-time:format-timestring nil (local-time:parse-timestring time)
+			      :format '(:year "-" :month "-" :day " " :hour ":" :min ":" :sec))
+
 (defun get-transactions ()
   (let* ((headers `(("Authorization" . ,#"Bearer ${*token*}")
 		    ;; ("X-Accept-Datetime-Format" . "UNIX")
@@ -157,23 +162,25 @@ from=${from}"
 	 )
     (reverse
      (remove nil
-	    (map (lm (trans)
-    		   (if (string= (cdr (assoc :type trans)) "ORDER_FILL")
-		       (let ((instrument (assoc :instrument trans))
-			     (units (assoc :units trans))
-			     (price (assoc :price trans))
-			     (account-balance (assoc :account-balance trans))
-			     (pl (assoc :realized-+pl+ (cadr (assoc :trades-closed trans))))
-			     (time (assoc :time trans))
-			     )
-			 ;; `(:instrument ,instrument :units ,units :price ,price
-			 ;; 	       :account-balance ,account-balance :units ,units :time ,time)
-			 ;; (alexandria:flatten
-			 ;;  (list instrument units price account-balance units pl time))
-			 (list instrument units price account-balance units pl time)
-			 ))
-		   )
-    		 (cdr (assoc :transactions transactions)))))
+	     (map (lm (trans)
+    		      (if (string= (cdr (assoc :type trans)) "ORDER_FILL")
+			  (let ((instrument (assoc :instrument trans))
+				(units (assoc :units trans))
+				(price (assoc :price trans))
+				(account-balance (assoc :account-balance trans))
+				(pl (assoc :realized-+pl+ (cadr (assoc :trades-closed trans))))
+				(time (local-time:format-timestring nil (local-time:parse-timestring (assoc :time trans))
+								    :format '(:year "-" :month "-" :day " " :hour ":" :min ":" :sec)))
+				
+				)
+			    ;; `(:instrument ,instrument :units ,units :price ,price
+			    ;; 	       :account-balance ,account-balance :units ,units :time ,time)
+			    ;; (alexandria:flatten
+			    ;;  (list instrument units price account-balance units pl time))
+			    (list instrument units price account-balance units pl time)
+			    ))
+		      )
+    		  (cdr (assoc :transactions transactions)))))
     ))
 
 ;; (get-transactions)
