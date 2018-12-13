@@ -647,13 +647,13 @@ from=${from}"
      :SPX500_USD (expt 10 1)
 
      ;; commodities
-     :BCO_USD (expt 10 -3)
-     :XCU_USD (expt 10 -1)
-     :CORN_USD (expt 10 -1)
+     :BCO_USD (expt 10 -1)
+     :XCU_USD (expt 10 -2)
+     :CORN_USD (expt 10 -2)
      :NATGAS_USD (expt 10 -1)
      :SOYBN_USD (expt 10 -1)
-     :SUGAR_USD (expt 10 -1)
-     :WTICO_USD (expt 10 1)
+     :SUGAR_USD (expt 10 -3)
+     :WTICO_USD (expt 10 0)
      :WHEAT_USD (expt 10 -1)
      ))
 
