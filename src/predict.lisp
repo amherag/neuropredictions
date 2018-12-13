@@ -647,14 +647,14 @@ from=${from}"
      :SPX500_USD (expt 10 1)
 
      ;; commodities
-     :BCO_USD (expt 10 -1)
+     :BCO_USD (expt 10 0) ;;
      :XCU_USD (expt 10 -2)
      :CORN_USD (expt 10 -2)
      :NATGAS_USD (expt 10 -1)
-     :SOYBN_USD (expt 10 -1)
+     :SOYBN_USD (expt 10 -2) ;; -1
      :SUGAR_USD (expt 10 -3)
      :WTICO_USD (expt 10 0)
-     :WHEAT_USD (expt 10 -1)
+     :WHEAT_USD (expt 10 -2) ;; -1
      ))
 
 ;; (:HEAT #H(:Z (0 0 1 8 63 4)
