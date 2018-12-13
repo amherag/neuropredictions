@@ -644,17 +644,32 @@ from=${from}"
      :ZAR_JPY (expt 10 -1)
 
      ;; indices
+     :AU200_AUD (expt 10 1)
+     :CN50_USD (expt 10 1)
+     :EU50_EUR (expt 10 1)
+     :FR40_EUR (expt 10 1)
+     :DE30_EUR (expt 10 1)
+     :HK33_HKD (expt 10 1)
+     :IN50_USD (expt 10 1)
+     :JP225_USD (expt 10 1)
+     :NL25_EUR (expt 10 1)
+     :SG30_SGD (expt 10 1)
+     :TWIX_USD (expt 10 1)
+     :UK100_GBP (expt 10 1)
+     :NAS100_USD (expt 10 1)
+     :US2000_USD (expt 10 1)
      :SPX500_USD (expt 10 1)
+     :US30_USD (expt 10 1)
 
      ;; commodities
-     :BCO_USD (expt 10 0) ;;
+     :BCO_USD (expt 10 0)
      :XCU_USD (expt 10 -2)
      :CORN_USD (expt 10 -2)
      :NATGAS_USD (expt 10 -1)
-     :SOYBN_USD (expt 10 -2) ;; -1
+     :SOYBN_USD (expt 10 -2)
      :SUGAR_USD (expt 10 -3)
      :WTICO_USD (expt 10 0)
-     :WHEAT_USD (expt 10 -2) ;; -1
+     :WHEAT_USD (expt 10 -2)
      ))
 
 ;; (:HEAT #H(:Z (0 0 1 8 63 4)

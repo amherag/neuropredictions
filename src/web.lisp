@@ -220,7 +220,22 @@
 (setf (gethash :ZAR_JPY *allowed-markets*) '(:gold :platinum))
 
 ;; indices
+(setf (gethash :AU200_AUD *allowed-markets*) '(:platinum))
+(setf (gethash :CN50_USD *allowed-markets*) '(:platinum))
+(setf (gethash :EU50_EUR *allowed-markets*) '(:platinum))
+(setf (gethash :FR40_EUR *allowed-markets*) '(:platinum))
+(setf (gethash :DE30_EUR *allowed-markets*) '(:platinum))
+(setf (gethash :HK33_HKD *allowed-markets*) '(:platinum))
+(setf (gethash :IN50_USD *allowed-markets*) '(:platinum))
+(setf (gethash :JP225_USD *allowed-markets*) '(:platinum))
+(setf (gethash :NL25_EUR *allowed-markets*) '(:platinum))
+(setf (gethash :SG30_SGD *allowed-markets*) '(:platinum))
+(setf (gethash :TWIX_USD *allowed-markets*) '(:platinum))
+(setf (gethash :UK100_GBP *allowed-markets*) '(:platinum))
+(setf (gethash :NAS100_USD *allowed-markets*) '(:platinum))
+(setf (gethash :US2000_USD *allowed-markets*) '(:platinum))
 (setf (gethash :SPX500_USD *allowed-markets*) '(:platinum))
+(setf (gethash :US30_USD *allowed-markets*) '(:platinum))
 
 ;; commodities
 (setf (gethash :BCO_USD *allowed-markets*) '(:platinum))
