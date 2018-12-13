@@ -653,13 +653,13 @@ from=${from}"
      :IN50_USD (expt 10 2)
      :JP225_USD (expt 10 2)
      :NL25_EUR (expt 10 0)
-     :SG30_SGD (expt 10 -2)
-     :TWIX_USD (expt 10 -2)
+     :SG30_SGD (expt 10 -3)
+     :TWIX_USD (expt 10 -3)
      :UK100_GBP (expt 10 2)
      :NAS100_USD (expt 10 3)
      :US2000_USD (expt 10 1)
      :SPX500_USD (expt 10 1)
-     :US30_USD (expt 10 0)
+     :US30_USD (expt 10 2)
 
      ;; commodities
      :BCO_USD (expt 10 0)
