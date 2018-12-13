@@ -645,21 +645,21 @@ from=${from}"
 
      ;; indices
      :AU200_AUD (expt 10 1)
-     :CN50_USD (expt 10 2) ;; 1
+     :CN50_USD (expt 10 2)
      :EU50_EUR (expt 10 1)
-     :FR40_EUR (expt 10 2) ;; 1
-     :DE30_EUR (expt 10 2) ;; 1
-     :HK33_HKD (expt 10 2) ;; 1
-     :IN50_USD (expt 10 2) ;; 1
-     :JP225_USD (expt 10 2) ;; 1
-     :NL25_EUR (expt 10 1)
-     :SG30_SGD (expt 10 1)
-     :TWIX_USD (expt 10 1)
-     :UK100_GBP (expt 10 1)
-     :NAS100_USD (expt 10 1)
+     :FR40_EUR (expt 10 2)
+     :DE30_EUR (expt 10 2)
+     :HK33_HKD (expt 10 2)
+     :IN50_USD (expt 10 2)
+     :JP225_USD (expt 10 2)
+     :NL25_EUR (expt 10 0)
+     :SG30_SGD (expt 10 0)
+     :TWIX_USD (expt 10 0)
+     :UK100_GBP (expt 10 2)
+     :NAS100_USD (expt 10 2)
      :US2000_USD (expt 10 1)
      :SPX500_USD (expt 10 1)
-     :US30_USD (expt 10 1)
+     :US30_USD (expt 10 -1)
 
      ;; commodities
      :BCO_USD (expt 10 0)
