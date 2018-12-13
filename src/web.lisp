@@ -31,117 +31,6 @@
 (defroute ("/(.+?\\.html)" :regexp t) (&key captures)
   (render (pathname (apply #'concatenate 'string captures))))
 
-;; (defroute ("/(.+?\\.js)" :regexp t) (&key captures)
-;;   (render (pathname (apply #'concatenate 'string captures))))
-
-;; (defroute ("/predict/load-data/:pair/:granularity" :method :get) (&key pair granularity)
-;;   ;;(setf (getf (response-headers *response* :content-type) "application/json"))
-;;   (let ((data (load-data (read-from-string (format nil ":~a" pair))
-;;                          (read-from-string (format nil ":~a" granularity))))
-;;         times
-;;         rates)
-;;     ;;(setf (getf (response-headers *response*) :content-type) "application/json")
-;;     (mapcar (lambda ( ;;i
-;;                      tuple)
-;;               (setq times (append times (list (/ (second tuple) 1000))))
-;;               (setq rates (append rates (list (first tuple))))
-;;               )
-;;             ;;(cl21:iota (length data))
-;;             data)
-;;     (render-json (list times rates))
-;;     (render-json
-;;      (cl21:hash-table #'equal
-;;                       :times times
-;;                       :rates rates))))
-
-;; (defroute ("/predict/load-data/:pair/:granularity" :method :get) (&key pair granularity)
-;;   ;;(setf (getf (response-headers *response* :content-type) "application/json"))
-;;   (let ((data (load-data (read-from-string (format nil ":~a" pair))
-;;                          (read-from-string (format nil ":~a" granularity))))
-;;         times
-;;         rates)
-;;     ;;(setf (getf (response-headers *response*) :content-type) "application/json")
-;;     (mapcar (lambda ( ;;i
-;;                      tuple)
-;;               (setq times (append times (list (/ (second tuple) 1000))))
-;;               (setq rates (append rates (list (first tuple))))
-;;               )
-;;             ;;(cl21:iota (length data))
-;;             data)
-;;     (render-json (list times rates))
-;;     (render-json
-;;      (cl21:hash-table #'equal
-;;                       :times times
-;;                       :rates rates))))
-
-;;(get-trades (load-data :AUD_USD :H1) '(10 11))
-
-
-;; copia
-;; (defroute ("/predict/load-trades/:pair/:granularity" :method :get) (&key pair granularity)
-;;   (let* ((jpy? (if (cl-ppcre:scan "JPY" pair) t))
-;;          (data (load-data (read-from-string (format nil ":~a" pair))
-;;                           (read-from-string (format nil ":~a" granularity))))
-;;          (trades (get-trades data
-;;                              (cl21:getf (cl21:getf *bests* (read-from-string (format nil ":~a" pair)))
-;;                                         (read-from-string (format nil ":~a" granularity)))
-;;                              jpy?)))
-;;     (render-json
-;;      (remove nil
-;;              (concatenate 'list
-;;                           (mapcar (lambda (fst snd)
-;;                                     (if (eq (first fst) :BUY)
-;;                                         (cl21:hash-table #'equal
-;;                                                          "backgroundColor" "rgba(0,0,255,0.0)"
-;;                                                          "borderColor" "rgba(0,0,255,0.4)"
-;;                                                          :data
-;;                                                          (list (cl21:hash-table #'equal
-;;                                                                                 :x (/ (second fst) 1000)
-;;                                                                                 :y (third fst))
-;;                                                                (cl21:hash-table #'equal
-;;                                                                                 :x (/ (second snd) 1000)
-;;                                                                                 :y (third snd))))
-;;                                         (if (eq (first fst) :SELL)
-;;                                             (cl21:hash-table #'equal
-;;                                                              "backgroundColor" "rgba(255,0,0,0.0)"
-;;                                                              "borderColor" "rgba(255,0,0,0.4)"
-;;                                                              :data
-;;                                                              (list (cl21:hash-table #'equal
-;;                                                                                     :x (/ (second fst) 1000)
-;;                                                                                     :y (third fst))
-;;                                                                    (cl21:hash-table #'equal
-;;                                                                                     :x (/ (second snd) 1000)
-;;                                                                                     :y (third snd))))
-;;                                             )))
-;;                                   trades
-;;                                   (rest trades))
-;;                           (if (eq (first (cl21:last trades)) :BUY)
-;;                               (list (cl21:hash-table #'equal
-;;                                                      "backgroundColor" "rgba(0,0,255,0.0)"
-;;                                                      "borderColor" "rgba(0,0,255,0.4)"
-;;                                                      :data
-;;                                                      (list (cl21:hash-table #'equal
-;;                                                                             :x (/ (second (cl21:last trades)) 1000)
-;;                                                                             :y (third (cl21:last trades)))
-;;                                                            (cl21:hash-table #'equal
-;;                                                                             :x (/ (second (cl21:last data)) 1000)
-;;                                                                             :y (first (cl21:last data))))))
-;;                               (if (eq (first (cl21:last trades)) :SELL)
-;;                                   (list (cl21:hash-table #'equal
-;;                                                          "backgroundColor" "rgba(255,0,0,0.0)"
-;;                                                          "borderColor" "rgba(255,0,0,0.4)"
-;;                                                          :data
-;;                                                          (list (cl21:hash-table #'equal
-;;                                                                                 :x (/ (second (cl21:last trades)) 1000)
-;;                                                                                 :y (third (cl21:last trades)))
-;;                                                                (cl21:hash-table #'equal
-;;                                                                                 :x (/ (second (cl21:last data)) 1000)
-;;                                                                                 :y (first (cl21:last data)))))))
-;;                               )
-;;                           )
-                  
-;;              ))))
-
 ;; (defparameter *data* (get-rates :AUD_USD 1 :M1))
 
 (defparameter *full-queue* nil)
@@ -272,32 +161,6 @@
 (setf (gethash :W *allowed-timeframes*) '(:bronze :silver :gold :platinum))
 (setf (gethash :M *allowed-timeframes*) '(:bronze :silver :gold :platinum))
 
-;; (defparameter *allowed-timeframes*
-;;   cl21:#H(
-;;           :S5 '(:bronze :silver :gold :platinum)
-;;      :S10 '(:bronze :silver :gold :platinum)
-;;      :S15 '(:bronze :silver :gold :platinum)
-;;      :S30 '(:bronze :silver :gold :platinum)
-;;      :M1 '(:bronze :silver :gold :platinum)
-;;      :M2 '(:bronze :silver :gold :platinum)
-;;      :M3 '(:bronze :silver :gold :platinum)
-;;      :M4 '(:bronze :silver :gold :platinum)
-;;      :M5 '(:bronze :silver :gold :platinum)
-;;      :M10 '(:bronze :silver :gold :platinum)
-;;      :M15 '(:bronze :silver :gold :platinum)
-;;      :M30 '(:bronze :silver :gold :platinum)
-;;      :H1 '(:bronze :silver :gold :platinum)
-;;      :H2 '(:bronze :silver :gold :platinum)
-;;      :H3 '(:bronze :silver :gold :platinum)
-;;      :H4 '(:bronze :silver :gold :platinum)
-;;      :H6 '(:bronze :silver :gold :platinum)
-;;      :H8 '(:bronze :silver :gold :platinum)
-;;      :H12 '(:bronze :silver :gold :platinum)
-;;      :D '(:bronze :silver :gold :platinum)
-;;      :W '(:bronze :silver :gold :platinum)
-;;      :M '(:bronze :silver :gold :platinum)
-;;      ))
-
 (defroute ("/transactions" :method :get) ()
     ;; (render-json (cl-json:encode-json-to-string (get-transactions)))
   (render-json (get-transactions)))
@@ -357,77 +220,6 @@
           )
         (render-json "{}"))))
 
-;; (defroute ("/predict/load-trades/:pair/:granularity" :method :get) (&key pair granularity)
-;;   (let* ((jpy? (if (cl-ppcre:scan "JPY" pair) t))
-;;          (data (load-data (read-from-string (format nil ":~a" pair))
-;;                           (read-from-string (format nil ":~a" granularity))))
-;;          (trades (get-trades data
-;;                              (cl21:getf (cl21:getf *bests* (read-from-string (format nil ":~a" pair)))
-;;                                         (read-from-string (format nil ":~a" granularity)))
-;;                              jpy?)))
-;;     (render-json
-;;      (remove nil
-;;              (concatenate 'list
-;;                           (mapcar (lambda (fst snd)
-;;                                     (if (eq (first fst) :BUY)
-;;                                         (cl21:hash-table #'equal
-;;                                                          "backgroundColor" "rgba(0,0,255,0.0)"
-;;                                                          "borderColor" "rgba(0,0,255,0.4)"
-;;                                                          :data
-;;                                                          (list (cl21:hash-table #'equal
-;;                                                                                 :x (/ (second fst) 1000)
-;;                                                                                 :y (third fst))
-;;                                                                (cl21:hash-table #'equal
-;;                                                                                 :x (/ (second snd) 1000)
-;;                                                                                 :y (third snd))))
-;;                                         (if (eq (first fst) :SELL)
-;;                                             (cl21:hash-table #'equal
-;;                                                              "backgroundColor" "rgba(255,0,0,0.0)"
-;;                                                              "borderColor" "rgba(255,0,0,0.4)"
-;;                                                              :data
-;;                                                              (list (cl21:hash-table #'equal
-;;                                                                                     :x (/ (second fst) 1000)
-;;                                                                                     :y (third fst))
-;;                                                                    (cl21:hash-table #'equal
-;;                                                                                     :x (/ (second snd) 1000)
-;;                                                                                     :y (third snd))))
-;;                                             )))
-;;                                   trades
-;;                                   (rest trades))
-;;                           (if (eq (first (cl21:last trades)) :BUY)
-;;                               (list (cl21:hash-table #'equal
-;;                                                      "backgroundColor" "rgba(0,0,255,0.0)"
-;;                                                      "borderColor" "rgba(0,0,255,0.4)"
-;;                                                      :data
-;;                                                      (list (cl21:hash-table #'equal
-;;                                                                             :x (/ (second (cl21:last trades)) 1000)
-;;                                                                             :y (third (cl21:last trades)))
-;;                                                            (cl21:hash-table #'equal
-;;                                                                             :x (/ (second (cl21:last data)) 1000)
-;;                                                                             :y (first (cl21:last data))))))
-;;                               (if (eq (first (cl21:last trades)) :SELL)
-;;                                   (list (cl21:hash-table #'equal
-;;                                                          "backgroundColor" "rgba(255,0,0,0.0)"
-;;                                                          "borderColor" "rgba(255,0,0,0.4)"
-;;                                                          :data
-;;                                                          (list (cl21:hash-table #'equal
-;;                                                                                 :x (/ (second (cl21:last trades)) 1000)
-;;                                                                                 :y (third (cl21:last trades)))
-;;                                                                (cl21:hash-table #'equal
-;;                                                                                 :x (/ (second (cl21:last data)) 1000)
-;;                                                                                 :y (first (cl21:last data)))))))
-;;                               )
-;;                           )
-                  
-;;              ))))
-
-;;(cl-json:decode-json-from-string)
-;;(cl-json:encode-json '(1 2 3))
-
-;;(load-data :EUR_USD :H1)
-
-
-
 ;;(load-data :AUD_USD :H1)
 
 
@@ -457,21 +249,6 @@
 
 ;; (gethash (first *keys*) *key-levels*)
 ;; (first *keys*)
-
-;; (defroute "/index.js" ()
-;;   (ignore-errors
-;;     ;; (setf (getf (response-headers *response* :content-type) "text/javascript"))
-;;     (render #P"index.js")))
-
-;; (defroute "/jquery.min.js" ()
-;;   (ignore-errors
-;;     ;; (setf (getf (response-headers *response* :content-type) "application/javascript"))
-;;     (render #P"jquery.min.js")))
-
-;; (defroute "/plotly-latest.min.js" ()
-;;   (ignore-errors
-;;     ;; (setf (getf (response-headers *response* :content-type) "application/javascript"))
-;;     (render #P"plotly-latest.min.js")))
 
 ;;
 ;; Error pages
