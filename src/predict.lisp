@@ -648,19 +648,21 @@ from=${from}"
 
      ;; commodities
      :BCO_USD (expt 10 -3)
-     :XCU_USD (expt 10 -3)
-     :CORN_USD (expt 10 -3)
-     :NATGAS_USD (expt 10 -3)
-     :SOYBN_USD (expt 10 -3)
-     :SUGAR_USD (expt 10 -3)
-     :WTICO_USD (expt 10 -3)
-     :WHEAT_USD (expt 10 -3)
+     :XCU_USD (expt 10 -1)
+     :CORN_USD (expt 10 -1)
+     :NATGAS_USD (expt 10 -1)
+     :SOYBN_USD (expt 10 -1)
+     :SUGAR_USD (expt 10 -1)
+     :WTICO_USD (expt 10 1)
+     :WHEAT_USD (expt 10 -1)
      ))
 
 ;; (:HEAT #H(:Z (0 0 1 8 63 4)
 ;;              :Y (1161/1000 581/500 1163/1000 291/250 233/200 583/500))
 ;;     :TIME 1.16499
 ;;     :RATE 1.16522)
+
+;; (get-data :WTICO_USD (get-rates :WTICO_USD 1 :H1))
 
 (defparameter *howmany* 100)
 ;; (get-data :EUR_USD (get-rates :EUR_USD 1 :M5))

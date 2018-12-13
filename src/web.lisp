@@ -232,7 +232,6 @@
 (setf (gethash :WTICO_USD *allowed-markets*) '(:platinum))
 (setf (gethash :WHEAT_USD *allowed-markets*) '(:platinum))
 
-
 (defparameter *allowed-timeframes* (make-hash-table))
 
 (setf (gethash :S5 *allowed-timeframes*) '(:silver :gold :platinum))
