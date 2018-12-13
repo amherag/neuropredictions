@@ -644,8 +644,17 @@ from=${from}"
      :ZAR_JPY (expt 10 -1)
 
      ;; indices
-     :BCO_USD (expt 10 -3)
      :SPX500_USD (expt 10 1)
+
+     ;; commodities
+     :BCO_USD (expt 10 -3)
+     :XCU_USD (expt 10 -3)
+     :CORN_USD (expt 10 -3)
+     :NATGAS_USD (expt 10 -3)
+     :SOYBN_USD (expt 10 -3)
+     :SUGAR_USD (expt 10 -3)
+     :WTICO_USD (expt 10 -3)
+     :WHEAT_USD (expt 10 -3)
      ))
 
 ;; (:HEAT #H(:Z (0 0 1 8 63 4)
