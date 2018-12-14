@@ -136,6 +136,21 @@
 (setf (gethash :WTICO_USD *allowed-markets*) '(:platinum))
 (setf (gethash :WHEAT_USD *allowed-markets*) '(:platinum))
 
+;; bonds
+(setf (gethash :DE10YB_EUR *allowed-markets*) '(:platinum))
+(setf (gethash :UK10YB_GBP *allowed-markets*) '(:platinum))
+(setf (gethash :USB10Y_USD *allowed-markets*) '(:platinum))
+(setf (gethash :USB02Y_USD *allowed-markets*) '(:platinum))
+(setf (gethash :USB05Y_USD *allowed-markets*) '(:platinum))
+(setf (gethash :USB30Y_USD *allowed-markets*) '(:platinum))
+
+;; metals
+(setf (gethash :XAU_USD *allowed-markets*) '(:platinum))
+(setf (gethash :XAU_XAG *allowed-markets*) '(:platinum))
+(setf (gethash :XPD_USD *allowed-markets*) '(:platinum))
+(setf (gethash :XPT_USD *allowed-markets*) '(:platinum))
+(setf (gethash :XAG_USD *allowed-markets*) '(:platinum))
+
 (defparameter *allowed-timeframes* (make-hash-table))
 
 (setf (gethash :S5 *allowed-timeframes*) '(:silver :gold :platinum))
