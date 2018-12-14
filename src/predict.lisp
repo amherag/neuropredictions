@@ -672,19 +672,19 @@ from=${from}"
      :WHEAT_USD (expt 10 -2)
 
      ;; bonds
-     :DE10YB_EUR (expt 10 1)
-     :UK10YB_GBP (expt 10 1)
-     :USB10Y_USD (expt 10 1)
-     :USB02Y_USD (expt 10 1)
-     :USB05Y_USD (expt 10 1)
-     :USB30Y_USD (expt 10 1)
+     :DE10YB_EUR (expt 10 -1)
+     :UK10YB_GBP (expt 10 -1)
+     :USB10Y_USD (expt 10 -1)
+     :USB02Y_USD (expt 10 -1)
+     :USB05Y_USD (expt 10 -1)
+     :USB30Y_USD (expt 10 -1)
      
      ;; metals
-     :XAU_USD (expt 10 1)
-     :XAU_XAG (expt 10 1)
+     :XAU_USD (expt 10 0)
+     :XAU_XAG (expt 10 -1)
      :XPD_USD (expt 10 1)
      :XPT_USD (expt 10 1)
-     :XAG_USD (expt 10 1)
+     :XAG_USD (expt 10 -1)
      
      ))
 
