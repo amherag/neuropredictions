@@ -99,14 +99,13 @@
                          (concatenate 'list pre-result (list howmany))))))
     result))
 
-(let ((queue 0))
-  (defun get-rates (instrument howmany-batches granularity)
-    "Gathers prices from Oanda.
+(defun get-rates (instrument howmany-batches granularity)
+  "Gathers prices from Oanda.
 A batch = 5,000 rates."
-    (labels ((recur (end result counter)
-               (let ((candles (ignore-errors
-                                (rest (assoc :candles (cl-json:decode-json-from-string
-                                                       (dex:get #"https://api-fxtrade.oanda.com/v1/candles?\
+  (labels ((recur (end result counter)
+             (let ((candles (ignore-errors
+                              (rest (assoc :candles (cl-json:decode-json-from-string
+                                                     (dex:get #"https://api-fxtrade.oanda.com/v1/candles?\
 instrument=${instrument}&\
 granularity=${granularity}&\
 count=500&\
@@ -114,26 +113,26 @@ end=${end}&\
 dailyAlignment=0&\
 candleFormat=bidask&\
 alignmentTimezone=America%2FNew_York"
-                                                                :insecure t
-                                                                :headers '(("X-Accept-Datetime-Format" . "UNIX")))))))))
-                 (sleep 0.5)
-                 (if (and candles (< counter howmany-batches))
-                     (recur (read-from-string
-                             (rest (assoc :time (first candles))))
-                            (append (map (lm (candle)
-                                           (list (assoc :close-bid candle)
-                                                 (assoc :open-bid candle)
-                                                 (assoc :high-bid candle)
-                                                 (assoc :low-bid candle)
-                                                 (assoc :time candle)))
-                                         candles)
-                                    result)
-                            (incf counter))
-                     result))))
+                                                              :insecure t
+                                                              :headers '(("X-Accept-Datetime-Format" . "UNIX")))))))))
+               (sleep 0.5)
+               (if (and candles (< counter howmany-batches))
+                   (recur (read-from-string
+                           (rest (assoc :time (first candles))))
+                          (append (map (lm (candle)
+                                         (list (assoc :close-bid candle)
+                                               (assoc :open-bid candle)
+                                               (assoc :high-bid candle)
+                                               (assoc :low-bid candle)
+                                               (assoc :time candle)))
+                                       candles)
+                                  result)
+                          (incf counter))
+                   result))))
   
-      (recur (* (local-time:timestamp-to-unix (local-time:now)) 1000000)
-             nil
-             0))))
+    (recur (* (local-time:timestamp-to-unix (local-time:now)) 1000000)
+           nil
+           0)))
 
 (defparameter *token* "de8e7e8fa3f2aee852772a4e30fcb345-1bba364396f84ea1be723f26c4291b9f")
 (defparameter *account* "001-004-1544726-003")
