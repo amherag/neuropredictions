@@ -380,3 +380,25 @@
   (/ (reduce #'+ (map (lambda (elt) (expt elt 2)) (map #'- series1 (rest series2))))
      (length series1)))
 
+(defun dir (series1 series2)
+  ((let ((sim series1)
+	 (real (rest series2))
+	 ;; we only need the real previous, as the simulated is based on the last real price at every moment
+	 ;; (prev (- (second series2) (first series2)))
+	 (prev (first series2))
+	 )
+
+     (reduce #'+
+	     (map (lambda (s r)
+		    (let ((real-dir (- r prev))
+			  (sim-dir (- s prev)))
+		      (setq prev r)
+		      (if (equal (plusp real-dir)
+				 (plusp sim-dir))
+			  0
+			  1))
+		    )
+		  sim
+		  real))
+     )))
+
