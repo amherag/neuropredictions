@@ -54,9 +54,9 @@
 	(setf (rest (nthcdr site x)) (rest (nthcdr site y))) 
 	(setf (rest (nthcdr site y)) swap))))
 
-(crossover '(1 2 3 4 5 6 7 8 9 10) '(11 12 13 14 15 16 17 18 19 20))
-(crossover (selectone (distribution '((1 2 3) (41 313 12) (5435 1234 122) (1313 4151 123))))
-	   (selectone (distribution '((1 2 3) (41 313 12) (5435 1234 122) (1313 4151 123)))))
+;; (crossover '(1 2 3 4 5 6 7 8 9 10) '(11 12 13 14 15 16 17 18 19 20))
+;; (crossover (selectone (distribution '((1 2 3) (41 313 12) (5435 1234 122) (1313 4151 123))))
+;; 	   (selectone (distribution '((1 2 3) (41 313 12) (5435 1234 122) (1313 4151 123)))))
 
 (defun mutate (genotype) 
   (mapcar #'(lambda (x) 

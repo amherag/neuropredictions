@@ -5,6 +5,7 @@
 ;; (ql-dist:install-dist "http://dists.cl21.org/cl21.txt")
 ;; (ql:register-local-projects)
 ;; (push "C:/Users/Amaury/neuropredictions/" asdf:*central-registry*)
+;; (push "/home/amherag/neuropredictions/" asdf:*central-registry*)
 
 (ql:quickload :neuropredictions)
 (neuropredictions:start :port 2001)

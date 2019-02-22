@@ -23,6 +23,7 @@
                :dexador
                :alexandria
                :cl-json
+	       :marshal
                ;; :clml
                :fare-memoization
 
