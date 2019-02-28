@@ -14,7 +14,7 @@
 
 ;; start module configuration
 
-(setf lparallel:*kernel* (lparallel:make-kernel 8))
+(setf lparallel:*kernel* (lparallel:make-kernel 4))
 (setf clnuplot:*plot-default-directory* *plots-directory*)
 
 ;; best, training with 66%, M15

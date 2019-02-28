@@ -10,13 +10,6 @@
            ))
 (in-package :neuropredictions.agents)
 
-(defparameter *pop* '((1 2 3) (4 4 1) (1 1 1) (3 1 2)))
-;; (fitness '(1 2 3))
-;; (selectone (distribution *pop*))
-;; (reproduce *pop*)
-
-;; (defclass broker ())
-
 (defun shuffle (sequence)
   (loop for i from (length sequence) downto 2
      do (rotatef (elt sequence (random-int *rand-gen* 0 (1- i)))
@@ -63,14 +56,17 @@
     ;; 	 (iota num-agents))
     (map (lm (_)
 	   (map (lm (_)
-		  (map (lm (_) `(,(random-int *rand-gen* 0 100) ,(float (/ (random-int *rand-gen* 0 30) 100)))) (iota 4)))
+		  (map (lm (_) `(,(random-int *rand-gen* 0 100)
+				  ,(random-int *rand-gen* 0 100)
+				  ,(float (/ (random-int *rand-gen* 0 100) 100))))
+		       (iota 4)))
 		(iota num-rules)))
 	 (iota num-agents))
     ))
 
-(defclass agent ()
-  ((beliefs :initarg :beliefs :initform (gen-beliefs) :accessor beliefs)
-   (rules :initarg :rules :initform (gen-rules 10) :accessor rules)))
+;; (defclass agent ()
+;;   ((beliefs :initarg :beliefs :initform (gen-beliefs) :accessor beliefs)
+;;    (rules :initarg :rules :initform (gen-rules 10) :accessor rules)))
 
 (defclass agents ()
   ((beliefs :initarg :beliefs :initform (gen-beliefs *num-agents*) :accessor beliefs)
@@ -117,6 +113,12 @@
                    (nreverse (cons src acc))))))
     (when list
       (rec list nil))))
+
+(defun file-get-contents (filename)
+  (with-open-file (stream filename)
+    (let ((contents (make-string (file-length stream))))
+      (read-sequence contents stream)
+      contents)))
 
 (defun agents-best (distribution)
   (cdar (sort (copy-seq distribution) #'< :key (lambda (elt) (first elt)))))
@@ -170,22 +172,104 @@
 (defparameter *num-rules* 2)
 (defparameter *cached-agents* (make-hash-table :test #'equal))
 
-;; (defparameter *population* (map (lm (_) (make-instance 'agents)) (iota 100)))
+(defun random-search (generations)
+  (let ((best-fitness 100)
+	(best-agents nil))
+    (doeach (x (iota generations))
+      (when *continue?*
+       (let* ((agents (make-instance 'agents))
+	     (fitness (agents-fitness agents nil)))
+	(if (< fitness best-fitness)
+	    (progn
+	      (setq best-fitness fitness)
+	      (setq best-agents agents)
+	      (setf *random-best* agents)
+	      (print best-fitness))
+	    (print best-fitness))))
+      )
+    best-agents))
+
+(defparameter *random-best* nil)
+;; (agents-fitness *random-best* t)
+;; (time (random-search 10))
+;; (ms:marshal *random-best*)
+
+(defun agents-extract (agents n)
+  (make-instance 'agents
+		 :beliefs (list (nth (slot-value agents 'beliefs) n))
+		 :rules (list (nth (slot-value agents 'rules) n))))
+
+(defun avg (lst)
+  (/ (reduce #'+ lst) (length lst)))
+
+(defun agent-uncertainty (agents)
+  "Used for only one agent."
+  (avg (map (lambda (rule)
+	      ;; (avg
+	      ;;  (map (lambda (r)
+	      ;; 	      (second r))
+	      ;; 	    rule))
+	      (second (last rule))
+	      )
+	    (first (slot-value agents 'rules)))))
+
+(defparameter *num-agents* 4)
+(defparameter *num-rules* 4)
+(defparameter *cached-agents* (make-hash-table :test #'equal))
+
+;; get all the agents' uncertainty
+;; (map (lambda (idx)
+;;        (print (agent-uncertainty (agents-extract *random-best* idx))))
+;;      (iota (length (slot-value *random-best* 'beliefs))))
+
+;; (agents-fitness (agents-extract *random-best* 9) nil t)
+
+;; (agents-fitness *random-best* nil #'dir)
+;; (agents-fitness *random-best* nil #'mse)
+
+;; (agents-fitness (first (slot-value (make-instance 'agents) 'rules)))
+
+;; Uptrend:
+;; 35% of the agents believe uptrend has a high resistance.
+;; Stagnation:
+;; 15% of the agents believe we're in a stagnation zone.
+;; Downtrend:
+;; 25% of the agents believe
 
 ;; here
+;; (defparameter *population* (map (lm (_) (make-instance 'agents)) (iota 10)))
 ;; (time (setf *population* (agents-reproduce *population*)))
-;; (time (doeach (x (iota 500)) (when *continue?* (setf *population* (agents-reproduce *population*)))))
+;; (time (doeach (x (iota 1000)) (when *continue?* (setf *population* (agents-reproduce *population*)))))
 ;; (time (agents-distribution *population* t))
-;; (time (agents-fitness (agents-best (agents-distribution *population*)) nil))
+;; (time (agents-fitness (agents-best (agents-distribution *population*)) t))
 ;; (format t "~{~a~%~}" (get-real-data))
 ;; (ms:marshal *population*)
 ;; (ms:marshal (get-real-data))
 
+;; (setf *rates* (ms:unmarshal (read-from-string (file-get-contents "src/2-21-2019.rates"))))
 
+;; (setf *random-best* (ms:unmarshal (read-from-string (file-get-contents "src/20agents-2rules-rand.pop"))))
+;; (setf *random-best* (ms:unmarshal (read-from-string (file-get-contents "src/10agents-2rules-rand.pop"))))
+;; (setf *random-best* (ms:unmarshal (read-from-string (file-get-contents "src/4agents-4rules-rand.pop"))))
+
+;; (setf *population* (ms:unmarshal (read-from-string (file-get-contents "src/20agents-2rules-100ind-100gen.pop"))))
+;; (setf *population* (ms:unmarshal (read-from-string (file-get-contents "src/10agents-2rules-100ind-100gen.pop"))))
+;; (setf *population* (ms:unmarshal (read-from-string (file-get-contents "src/4agents-4rules-100ind-150gen.pop"))))
+
+
+;; #Agents, #Rules, #Individuals, #Generations, #Markets
+;;; Capacity of modelling (lower # of rules better results?)
+;; Training charts
+;;; Interpretation
+;;; Profit plots
+;;;; How many agents were profitable
+;; Forecasting
+;;; Interpretation
+;;; Profit plots
 
 (defun agents-distribution (population &optional (print-best? nil))
   "Done."
-  (let* ((fitnesses (map #'agents-fitness population))
+  (let* ((fitnesses (pmapcar #'agents-fitness population))
 	 (sum (apply #'+ fitnesses)))
     (if print-best?
 	(print (first (sort (copy-seq fitnesses) #'<))))
@@ -278,7 +362,7 @@
 ;; (pprint (apply #'nconc (apply #'nconc (slot-value (make-instance 'agents) 'rules))))
 ;; (agents-crossover (make-instance 'agents) (make-instance 'agents))
 
-(defun agents-mutate (agents &optional (chance 0.000))
+(defun agents-mutate (agents &optional (chance 0.005))
   "Done."
   (let (changed?)
     (setf (slot-value agents 'beliefs)
@@ -299,7 +383,7 @@
 				   params
 				   (progn
 				     (setq changed? t)
-				     (list (random-int *rand-gen* 0 100) (float (/ (random-int *rand-gen* 0 30) 100)))
+				     (caaar (gen-rules 1 1))
 				     )))
 			     rule)
 			)
@@ -315,7 +399,7 @@
 ;; 	 ;; nil
 ;; 	 )
 
-(defun agents-fitness (agents &optional (print-sim? nil))
+(defun agents-fitness (agents &optional (print-sim? nil) (print-dir? nil))
   "Done."
   (let ((sig (reduce #'+
 		     (append (alexandria:flatten (slot-value agents 'beliefs))
@@ -323,6 +407,7 @@
     (if (and (not print-sim?) (gethash *cached-agents* sig))
 	(gethash *cached-agents* sig)
 	(handler-case (let* ((all-levels (map (lambda (belief) (remove nil belief)) (slot-value agents 'beliefs)))
+			     (closes)
 			     (data (map (lambda (levels)
 					  (map (lambda (heat)
 						 (let ((heat (gethash heat :heat))
@@ -335,6 +420,7 @@
 								  res
 								  (1- (length (gethash heat :y)))
 								  )))
+						     (push close closes)
 						     (list (nth z (if (< (- index 2) 0) 0 (- index 2)))
 							   (nth z (if (< (- index 1) 0) 1 (- index 1)))
 							   (nth z index)
@@ -354,6 +440,8 @@
 					      ))))
 			  (if print-sim?
 			      (format t "~{~a~%~}" (append (list (first sim)) sim)))
+			  (if print-dir?
+			      (format t "~{~a~%~}" (dir sim (get-real-data))))
 			  (let ((err (mse sim (get-real-data))))
 			    (if (not print-sim?)
 				(setf (gethash *cached-agents* sig) err))
@@ -368,6 +456,88 @@
     )
   )
 
+(defun agents-describe (agents)
+  (let* ((all-levels (map (lambda (belief) (remove nil belief)) (slot-value agents 'beliefs)))
+	 (closes)
+	 (data (map (lambda (levels)
+		      (map (lambda (heat)
+			     (let ((heat (gethash heat :heat))
+				   (close (gethash heat :close)))
+			       (let ((z (gethash heat :z))
+				     (index (alexandria:if-let
+						((res (search `(,close) (gethash heat :y)
+							      :key (lm (elt)
+								     (when (> close elt) t)))))
+					      res
+					      (1- (length (gethash heat :y)))
+					      )))
+				 (push close closes)
+				 (list (nth z (if (< (- index 2) 0) 0 (- index 2)))
+				       (nth z (if (< (- index 1) 0) 1 (- index 1)))
+				       (nth z index)
+				       close
+				       )))
+			     )
+			   (get-data :EUR_USD *rates* :levels levels)
+			   )
+		      )
+		    all-levels)))
+    (let ((sim (cl-json:decode-json-from-string
+		(dex:post "http://localhost:5000/ifis-agents"
+			  ;; :headers '(("Content-Type" . "application/json"))
+			  :content `(("inputs". ,(cl-json:encode-json-to-string
+						  data))
+				     ("rules" . ,(cl-json:encode-json-to-string (slot-value agents 'rules))))
+			  ))))
+      (list (length
+	     (dir sim (get-real-data)))
+	    (length sim)
+	    (length (get-real-data))
+	    (length (first data)))
+      )
+    )
+  )
+
+;; here
+;; (agents-describe (agents-extract (first *population*) 1))
+
+;; (caar (slot-value (agents-extract (first *population*) 1) 'rules))
+
+(defun beta (pi mu1 mu2)
+  (/ (* pi 100) (1+ (- mu1 mu2))))
+
+;; (beta 0.1 99 60)
+
+(defun interpret-indeterminacy (pi mu1 mu2)
+  (let ((beta (beta pi mu1 mu2)))
+    (cond ((= beta 0) "without hesitancy")
+	((< beta 0.25) "little hesitancy")
+	((< beta 0.5) "some hesitancy")
+	((< beta 1.5) "moderate hesitancy")
+	((< beta 3.0) "considerable hesitancy")
+	((< beta 5.0) "high hesitancy")
+	((<= beta 100.0) "very high hesitancy")
+	(t "unkown hesitancy"))))
+
+;; (interpret-indeterminacy 0.3 99 30)
+
+(defun interpret-proximity (diff)
+  )
+
+(defun interpret-transaction (mean)
+  (cond ((= mean 0) "totally sure of a downtrend")
+	((< mean 20) "sell ")
+	((< mean 0.1) "some hesitancy")
+	((< mean 0.15) "moderate hesitancy")
+	((< mean 0.20) "considerable hesitancy")
+	((< mean 0.25) "high hesitancy")
+	((<= mean 0.3) "very high hesitancy")
+	(t "unkown hesitancy")))
+
+(defun interpret-consequent (ifs)
+  (let ((diff (abs (- (nth ifs 0) (nth ifs 1)))))
+    diff))
+
 ;; (agents-fitness (nth *population* 4))
 
 ;; (defparameter *agents* (make-instance 'agents))
@@ -381,24 +551,22 @@
      (length series1)))
 
 (defun dir (series1 series2)
-  ((let ((sim series1)
-	 (real (rest series2))
-	 ;; we only need the real previous, as the simulated is based on the last real price at every moment
-	 ;; (prev (- (second series2) (first series2)))
-	 (prev (first series2))
-	 )
-
-     (reduce #'+
-	     (map (lambda (s r)
-		    (let ((real-dir (- r prev))
-			  (sim-dir (- s prev)))
-		      (setq prev r)
-		      (if (equal (plusp real-dir)
-				 (plusp sim-dir))
-			  0
-			  1))
-		    )
-		  sim
-		  real))
-     )))
-
+  "Currently it returns the agent profit at each trade."
+  (let ((sim series1)
+	(real (rest series2))
+	;; we only need the real previous, as the simulated is based on the last real price at every moment
+	;; (prev (- (second series2) (first series2)))
+	(prev (first series2))
+	)
+    (map (lambda (s r)
+	   (let ((real-dir (- r prev))
+		 (sim-dir (- s prev)))
+	     (setq prev r)
+	     (if (equal (plusp real-dir)
+			(plusp sim-dir))
+		 (abs sim-dir)
+		 (* -1 (abs sim-dir))))
+	   )
+	 sim
+	 real)
+    ))
