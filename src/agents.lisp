@@ -10,6 +10,21 @@
            ))
 (in-package :neuropredictions.agents)
 
+(defun combinations (&rest lists)
+  (if (endp lists)
+      (list nil)
+      (mapcan (lambda (inner-val)
+		(map (lambda (outer-val)
+		       (cons outer-val
+			     inner-val))
+		     (car lists)))
+	      (apply #'combinations (cdr lists)))))
+
+(defun access (item alist)
+  (second (assoc item alist)))
+
+;; (access :profit '((:meow 5) (:profit (1 31 12))))
+
 (defun shuffle (sequence)
   (loop for i from (length sequence) downto 2
      do (rotatef (elt sequence (random-int *rand-gen* 0 (1- i)))
@@ -19,6 +34,23 @@
 (defun round-to (number precision &optional (what #'round))
   (float (let ((div (expt 10 precision)))
            (/ (funcall what (* number div)) div))))
+
+
+
+(map (lambda (price rprice)
+       (map (lm (fib)
+	      (+ rprice (* fib (- rprice price))))
+	    '(0.236 0.382 0.618)))
+     '(1.35 1.36 1.34 1.35)
+     (rest '(1.35 1.36 1.34 1.35)))
+
+(map (lambda (price)
+       (map (lm (fib)
+	      (* fib price))
+	    '(0.236 0.382 0.618)))
+     '(1.35 1.36 1.34 1.35))
+
+
 
 (defun gen-beliefs (n)
   (let ((options '(0.236 0.382 0.5 0.618 1 1.618)))
@@ -93,7 +125,21 @@
 ;; (dex:post "http://localhost:5000/ifis-agents"
 ;;           :content '(("data". "hello")))
 
-(defparameter *rates* (get-rates :EUR_USD 1 :H1))
+;; (defparameter *rates* (get-rates :EUR_USD 1 :H1))
+
+;; (defparameter *AUD_USD* (get-rates :AUD_USD 2 :H1))
+;; (defparameter *EUR_GBP* (get-rates :EUR_GBP 2 :H1))
+;; (defparameter *EUR_JPY* (get-rates :EUR_JPY 2 :H1))
+;; (defparameter *EUR_USD* (get-rates :EUR_USD 2 :H1))
+;; (defparameter *GBP_USD* (get-rates :GBP_USD 2 :H1))
+;; (defparameter *USD_CAD* (get-rates :USD_CAD 2 :H1))
+;; (defparameter *USD_JPY* (get-rates :USD_JPY 2 :H1))
+
+;; market data
+;; beginning training: Friday, January 4, 2019 1:00:00 AM GMT-08:00
+;; end training: Sunday, February 3, 2019 8:00:00 PM GMT-08:00
+;; beginning testing: Sunday, February 3, 2019 9:00:00 PM GMT-08:00
+;; end testing: Monday, March 4, 2019 4:00:00 PM GMT-08:00
 
 ;; (pprint (slot-value (make-instance 'agents) 'beliefs))
 ;; (pprint (slot-value (make-instance 'agents) 'rules))
@@ -128,7 +174,9 @@
 
 (defun agents-reproduce (population)
   (let* ((offspring nil)
-	 (d (agents-distribution population t))
+	 (d (agents-distribution population))
+	 (fitness (multiple-value-bind (_ f) (agents-distribution population)
+		    f))
 	 (best (agents-best d))
 	 (best-beliefs (slot-value best 'beliefs))
 	 (best-rules (slot-value best 'rules))
@@ -152,14 +200,16 @@
     ;;   )
     ;; (pushnew (agents-best d) offspring)
     ;; offspring
-    (if best-removed?
-	;; (= (agents-fitness (agents-distribution population))
-	;; 	(agents-fitness ))
-	(append (list (make-instance 'agents
-				     :beliefs best-beliefs
-				     :rules best-rules))
-		(agents-without-worst (agents-distribution population)))
-	population)
+    (values
+     (if best-removed?
+	 ;; (= (agents-fitness (agents-distribution population))
+	 ;; 	(agents-fitness ))
+	 (append (list (make-instance 'agents
+				      :beliefs best-beliefs
+				      :rules best-rules))
+		 (agents-without-worst (agents-distribution population)))
+	 population)
+     fitness)
     ;; (append (list (make-instance 'agents))
     ;; 	    (agents-without-worst (agents-distribution population)))
     )
@@ -213,9 +263,12 @@
 	      )
 	    (first (slot-value agents 'rules)))))
 
-(defparameter *num-agents* 4)
-(defparameter *num-rules* 4)
-(defparameter *cached-agents* (make-hash-table :test #'equal))
+(defun write-to-file (filename content)
+  (with-open-file (str filename
+		       :direction :output
+		       :if-exists :supersede
+		       :if-does-not-exist :create)
+    (format str content)))
 
 ;; get all the agents' uncertainty
 ;; (map (lambda (idx)
@@ -236,11 +289,111 @@
 ;; Downtrend:
 ;; 25% of the agents believe
 
+(defun agents-do-all ()
+  (doeach (config (combinations '(4 10 20) '(4 10 20) '(4 10 20)
+				'("aud_usd" "eur_gbp" ;; "eur_jpy" "usd_jpy"
+				  "eur_usd" "gbp_usd" "usd_cad")))
+
+    (defparameter *file-name* (format nil "results/~a_h1-~aagents-~arules-~aind-100gen"
+				      (nth config 3) (nth config 0) (nth config 1) (nth config 2)))
+  
+    (when (not (probe-file
+		(format nil "~a_population.dat"
+			*file-name*
+			(nth config 3) (nth config 0) (nth config 1) (nth config 2))))
+    
+      (format t "Running ~s~%" *file-name*)
+    
+      (defparameter *cached-agents* (make-hash-table :test #'equal))
+      (defparameter *num-agents* (nth config 0))
+      (defparameter *num-rules* (nth config 1))
+      (defparameter *population* (map (lm (_) (make-instance 'agents)) (iota (nth config 2))))
+  
+      (defparameter *fitnesses* nil)
+  
+      (defparameter *error* nil)
+      (defparameter *sim* nil)
+      (defparameter *profits* nil)
+
+      ;; setting training data-set
+      (defparameter *rates* (subseq (ms:unmarshal (read-from-string (file-get-contents (concatenate 'string "data/" (nth config 3) ".dat")))) 0 500))
+
+      (doeach (x (iota 100))
+	(multiple-value-bind (agents fitness)
+	    (agents-reproduce *population*)
+	  (setf *population* agents)
+	  (push fitness *fitnesses*)))
+
+      (defparameter *best-agent* (agents-best (agents-distribution *population*)))
+
+      ;; extracting report data for training stage
+      (multiple-value-bind (err sim profits)
+	  (agents-fitness (agents-best (agents-distribution *population*)) t)
+	(setf *error* err)
+	(setf *sim* sim)
+	(setf *profits* profits))
+
+      ;; writing population
+      (write-to-file (format nil "~a_population.dat" *file-name*)
+		     (format nil "~s" (ms:marshal *population*)))
+
+      ;; writing report for training stage
+      (write-to-file (format nil "~a_training_report.csv" *file-name*)
+		     (concatenate 'string (format nil "real,sim,profits,acc-profits,error~%")
+				  (format nil "~{~a~%~}" (map (lambda (&rest rest)
+								(format nil "~{~a~^,~}"rest))
+							      (get-real-data)
+							      *sim*
+							      *profits*
+							      (get-accumulation 0 *profits*)
+							      (reverse *fitnesses*))
+					  )))
+      ;; writing training error
+      (write-to-file (format nil "~a_training_error.txt" *file-name*)
+		     (format nil "~s" *error*))
+
+      ;; writing training interpretation
+      (write-to-file (format nil "~a_training_interpretation.txt" *file-name*)
+		     (agents-describe *best-agent*))
+
+      ;; =========================
+      ;; setting testing dataset
+      (defparameter *rates* (subseq (ms:unmarshal (read-from-string (file-get-contents (concatenate 'string "data/" (nth config 3) ".dat")))) 100 600))
+
+      ;; extracting report data for testing stage
+      (multiple-value-bind (err sim profits)
+	  (agents-fitness (agents-best (agents-distribution *population*)) t)
+	(setf *error* err)
+	(setf *sim* sim)
+	(setf *profits* profits))
+    
+      ;; writing report for testing stage
+      (write-to-file (format nil "~a_testing_report.csv" *file-name*)
+		     (concatenate 'string (format nil "real,sim,profits,acc-profits~%")
+				  (format nil "~{~a~%~}" (map (lambda (&rest rest)
+								(format nil "~{~a~^,~}"rest))
+							      (get-real-data)
+							      *sim*
+							      *profits*
+							      (get-accumulation 0 *profits*))
+					  )))
+      ;; writing testing error
+      (write-to-file (format nil "~a_testing_error.txt" *file-name*)
+		     (format nil "~s" *error*))
+
+      ;; writing testing interpretation
+      (write-to-file (format nil "~a_testing_interpretation.txt" *file-name*)
+		     (agents-describe *best-agent*))
+      )
+    ))
+
+;; (agents-do-all)
+
 ;; here
-;; (defparameter *population* (map (lm (_) (make-instance 'agents)) (iota 10)))
+;; (defparameter *population* (map (lm (_) (make-instance 'agents)) (iota 4)))
 ;; (time (setf *population* (agents-reproduce *population*)))
-;; (time (doeach (x (iota 1000)) (when *continue?* (setf *population* (agents-reproduce *population*)))))
-;; (time (agents-distribution *population* t))
+;; (time (doeach (x (iota 100)) (when *continue?* (setf *population* (agents-reproduce *population*)))))
+;; (time (agents-distribution *population*))
 ;; (time (agents-fitness (agents-best (agents-distribution *population*)) t))
 ;; (format t "~{~a~%~}" (get-real-data))
 ;; (ms:marshal *population*)
@@ -261,22 +414,49 @@
 ;;; Capacity of modelling (lower # of rules better results?)
 ;; Training charts
 ;;; Interpretation
+;;;; #Agents seeing what
 ;;; Profit plots
+;;;; Real - Simulated, per agent, as a whole
 ;;;; How many agents were profitable
 ;; Forecasting
 ;;; Interpretation
 ;;; Profit plots
+;;;; Real - Simulated, per agent, as a whole
 
-(defun agents-distribution (population &optional (print-best? nil))
+;; What to save (serialize)
+;; Population
+;; Market rates (half for training, half for testing)
+;=== to automate ====
+;; Real rates (training 500) ××
+;; simulated rates (training)
+;; Profit at each trade at training (defun dir)
+;; Real rates (testing 500)
+;; Simulated rates (testing)
+;; Profit at each trade at testing (defun dir)
+;; 
+;; Error minimization (they are 100)
+;; Error at training
+;; Error at testing (defun mse)
+
+;; What to test
+;; Agents: 4, 10, 20
+;; Rules: 2, 4, 10
+;; Individuals: 4, 10, 20
+;; Markets: AUD_USD, EUR_GBP, EUR_JPY, EUR_USD, GBP_USD, USD_CAD, USD_JPY
+
+;; Generations: 100 (the point is to reach certain curve-fit and that's it)
+;; Timeframe: 1H (the point is to demonstrate, not to find where it's better)
+
+(defun agents-distribution (population)
   "Done."
   (let* ((fitnesses (pmapcar #'agents-fitness population))
 	 (sum (apply #'+ fitnesses)))
-    (if print-best?
-	(print (first (sort (copy-seq fitnesses) #'<))))
-    (map (lambda (fitness x)
-	   (cons (/ fitness sum) x))
-	 fitnesses
-	 population)))
+    (values
+     (map (lambda (fitness x)
+	    (cons (/ fitness sum) x))
+	  fitnesses
+	  population)
+     (first (sort (copy-seq fitnesses) #'<)))))
 
 ;; (agents-fitness (make-instance 'agents))
 ;; (map #'agents-fitness (list (make-instance 'agents) (make-instance 'agents) (make-instance 'agents) (make-instance 'agents)))
@@ -399,12 +579,12 @@
 ;; 	 ;; nil
 ;; 	 )
 
-(defun agents-fitness (agents &optional (print-sim? nil) (print-dir? nil))
+(defun agents-fitness (agents &optional (sim-and-dir? nil))
   "Done."
   (let ((sig (reduce #'+
 		     (append (alexandria:flatten (slot-value agents 'beliefs))
 			     (alexandria:flatten (slot-value agents 'rules))))))
-    (if (and (not print-sim?) (gethash *cached-agents* sig))
+    (if (and (not sim-and-dir?) (gethash *cached-agents* sig))
 	(gethash *cached-agents* sig)
 	(handler-case (let* ((all-levels (map (lambda (belief) (remove nil belief)) (slot-value agents 'beliefs)))
 			     (closes)
@@ -438,14 +618,17 @@
 								      data))
 							 ("rules" . ,(cl-json:encode-json-to-string (slot-value agents 'rules))))
 					      ))))
-			  (if print-sim?
-			      (format t "~{~a~%~}" (append (list (first sim)) sim)))
-			  (if print-dir?
-			      (format t "~{~a~%~}" (dir sim (get-real-data))))
 			  (let ((err (mse sim (get-real-data))))
-			    (if (not print-sim?)
+			    (if (not sim-and-dir?)
 				(setf (gethash *cached-agents* sig) err))
-			    err)
+			    (if sim-and-dir?
+				(values err
+					;; simulated rates
+					(let ((tmp (append (list (first sim)) sim)))
+					  (reverse (rest (reverse tmp))))
+					;; profit at each trade
+					(append (list 0) (dir sim (get-real-data))))
+				err))
 			  )
 			)
 	  (error (c)
@@ -481,32 +664,183 @@
 			   (get-data :EUR_USD *rates* :levels levels)
 			   )
 		      )
-		    all-levels)))
-    (let ((sim (cl-json:decode-json-from-string
-		(dex:post "http://localhost:5000/ifis-agents"
-			  ;; :headers '(("Content-Type" . "application/json"))
-			  :content `(("inputs". ,(cl-json:encode-json-to-string
-						  data))
-				     ("rules" . ,(cl-json:encode-json-to-string (slot-value agents 'rules))))
-			  ))))
-      (list (length
-	     (dir sim (get-real-data)))
-	    (length sim)
-	    (length (get-real-data))
-	    (length (first data)))
+		    all-levels))
+	 (agents-profits (map (lambda (agent-data agent-rules)
+				(let ((sim (cl-json:decode-json-from-string
+					    (dex:post "http://localhost:5000/ifis-agents"
+						      ;; :headers '(("Content-Type" . "application/json"))
+						      :content `(("inputs". ,(cl-json:encode-json-to-string
+									      (list agent-data)))
+								 ("rules" . ,(cl-json:encode-json-to-string (list agent-rules))))
+						      ))))
+				  (reduce #'+ (dir sim (get-real-data)))
+				  ))
+			      data
+			      (slot-value agents 'rules)
+			      ))
+	 (agents-perception (let ((simp-fibos (map (lambda (agent-data)
+						     (let* ((data-no-pi (map (lambda (elt) (subseq elt 0 3)) agent-data))
+							    (mx (apply #'max (alexandria:flatten data-no-pi)))
+							    )
+						       (map (lambda (datum)
+							      (map (lambda (d)
+								     (let ((nd (/ d mx)))
+								       (cond ((< nd (/ 1 3)) 0)
+									     ((< nd (/ 2 3)) 1)
+									     (t 2))))
+								   datum))
+							    data-no-pi)
+						       ))
+						   data)))
+			      (map (lambda (agent-fibos)
+				     (let ((above-high 0) (level-high 0) (below-high 0)
+					   (above-med 0) (level-med 0) (below-med 0)
+					   (above-low 0) (level-low 0) (below-low 0)
+					   (lfib (length agent-fibos)))
+				       (map (lambda (fibos)
+					      (cond ((= (first fibos) 0) (incf above-low))
+						    ((= (first fibos) 1) (incf above-med))
+						    ((= (first fibos) 2) (incf above-high)))
+			    
+					      (cond ((= (second fibos) 0) (incf level-low))
+						    ((= (second fibos) 1) (incf level-med))
+						    ((= (second fibos) 2) (incf level-high)))
+			    
+					      (cond ((= (third fibos) 0) (incf below-low))
+						    ((= (third fibos) 1) (incf below-med))
+						    ((= (third fibos) 2) (incf below-high)))
+					      )
+					    agent-fibos)
+				       (list (list (/ above-low lfib) (/ above-med lfib) (/ above-high lfib))
+					     (list (/ level-low lfib) (/ level-med lfib) (/ level-high lfib))
+					     (list (/ below-low lfib) (/ below-med lfib) (/ below-high lfib)))))
+				   simp-fibos)
+			      )))
+
+    (let ((interprets (make-hash-table :test #'equal)))
+      (map (lambda (agent-number agent-rules)
+    	     (let ((dups (make-hash-table :test #'equal)))
+    	       (map (lambda (agent-rule)
+    		      (let ((simp-rule (map (lambda (clause)
+    					      (let ((b (apply #'beta clause))
+    						    (action (cond ((< (first clause) 33) 0) ;; sell
+    								  ((< (first clause) 66) 1) ;; buy or sell a little
+    								  (t 2) ;; buy
+    								  )))
+
+    						(list action b)
+    						))
+    					    agent-rule)))
+    			(map (lambda (fibo-type clause)
+    			       ;; buy; above; low fib
+    			       (let ((key (list `(:action ,(first (last simp-rule)))
+    						`(:fibo-type ,fibo-type)
+    						`(:fibo-strength ,(first clause))))
+    				     (num-agents )
+    				     (pi-fibo (second clause))
+    				     (pi-action (second (last simp-rule)))
+    				     (profit (nth agents-profits agent-number))
+    				     (perception (nth (nth (nth agents-perception agent-number)
+							   fibo-type)
+						      (first clause))))
+
+    				 (when (gethash interprets key) ;; already exists, I need to average
+    				   (setq pi-fibo (/ (+ (access :pi-fibo (gethash interprets key))
+    						       pi-fibo)
+    						    2)
+    					 pi-action (/ (+ (access :pi-action (gethash interprets key))
+    							 pi-action)
+    						      2)
+    					 profit (/ (+ (access :profit (gethash interprets key))
+    						      profit)
+    						   2)
+					 perception (/ (+ (access :perception (gethash interprets key))
+							  perception)
+						       2)))
+				 
+    				 (if (gethash dups key)
+    				     (setf (gethash interprets key)
+    					   (list `(:num-agents ,(access :num-agents (gethash interprets key)))
+    						 `(:pi-fibo ,pi-fibo)
+    						 `(:pi-action ,pi-action)
+						 `(:perception ,(float perception))
+						 `(:profit ,profit)))
+    				     (progn
+    				       (setf (gethash dups key) t)
+    				       (setf (gethash interprets key)
+    					     (list `(:num-agents ,(if (gethash interprets key)
+    								      (1+ (access :num-agents (gethash interprets key)))
+    								      1))
+    						   `(:pi-fibo ,pi-fibo)
+    						   `(:pi-action ,pi-action)
+						   `(:perception ,(float perception))
+						   `(:profit ,profit)))
+    				       )
+    				     )
+    				 )
+    			       )
+    			     (iota 3)
+    			     (reverse (rest (reverse simp-rule))))
+    			))
+    		    agent-rules)))
+    	   (iota (length (slot-value agents 'rules)))
+    	   (slot-value agents 'rules))
+
+      (format nil "~{~a~^~%~}"
+	      (map (lambda (elt)
+		     (let* ((key (car elt))
+			    (body (cdr elt))
+			    (num-agents (access :num-agents body))
+			    (profit (round (* (access :profit body) 10000)))
+			    (perception (round (* (access :perception body) 100)))
+			    (fibo-strength (access :fibo-strength key))
+			    (fibo-type (access :fibo-type key))
+			    (pi-fibo (round-to (access :pi-fibo body) 3))
+			    (action (access :action key))
+			    (pi-action (round-to (access :pi-action body) 3))
+			    )
+		       (format nil "* ~a agents — with an average profit of ~a units — perceived in ~a% of the market that a ~a resistance ~a — with a hesitancy of ~a — is a signal to ~a — with a hesitancy of ~a."
+			       num-agents
+			       profit
+			       perception
+			       (cond ((= fibo-strength 0) "weak")
+				     ((= fibo-strength 1) "moderate")
+				     ((= fibo-strength 2) "strong"))
+			       (cond ((= fibo-type 0) "above current price")
+				     ((= fibo-type 1) "nearby current price")
+				     ((= fibo-type 2) "below current price"))
+			       pi-fibo
+			       (cond ((= action 0) "sell")
+				     ((= action 1) "hold the current position")
+				     ((= action 2) "buy"))
+			       pi-action
+			       ))
+		     )
+		   (sort (copy-seq (alexandria:hash-table-alist interprets))
+			 (lambda (elt1 elt2)
+			   (if (= (access :num-agents elt1)
+				  (access :num-agents elt2))
+			       (> (access :profit elt1)
+				  (access :profit elt2))
+			       (> (access :num-agents elt1)
+				  (access :num-agents elt2))))
+			 )))
+      
       )
     )
   )
 
 ;; here
+;; (agents-describe (agents-best (agents-distribution *population*)))
 ;; (agents-describe (agents-extract (first *population*) 1))
 
 ;; (caar (slot-value (agents-extract (first *population*) 1) 'rules))
 
-(defun beta (pi mu1 mu2)
-  (/ (* pi 100) (1+ (- mu1 mu2))))
+(defun beta (mu1 mu2 pi)
+  (/ pi (sqrt (1+ (abs (- mu1 mu2))))))
 
-;; (beta 0.1 99 60)
+;; (beta 99 90 0.5)
+;; (beta 100 0 1.0)
 
 (defun interpret-indeterminacy (pi mu1 mu2)
   (let ((beta (beta pi mu1 mu2)))
@@ -520,6 +854,7 @@
 	(t "unkown hesitancy"))))
 
 ;; (interpret-indeterminacy 0.3 99 30)
+;; (beta 0.3 99 99)
 
 (defun interpret-proximity (diff)
   )
@@ -545,6 +880,13 @@
 
 (defun get-real-data ()
   (reverse (subseq (reverse (map (lambda (rate) (cdr (assoc :close-bid rate))) *rates*)) 0 100)))
+
+(defun get-accumulation (start vals)
+  (let ((results `(,start)))
+    (map (lambda (val)
+	   (push (+ (first results) val) results))
+	 vals)
+    (rest (reverse results))))
 
 (defun mse (series1 series2)
   (/ (reduce #'+ (map (lambda (elt) (expt elt 2)) (map #'- series1 (rest series2))))

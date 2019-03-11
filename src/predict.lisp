@@ -15,7 +15,7 @@
 ;; start module configuration
 
 (setf lparallel:*kernel* (lparallel:make-kernel 4))
-(setf clnuplot:*plot-default-directory* *plots-directory*)
+;; (setf clnuplot:*plot-default-directory* *plots-directory*)
 
 ;; best, training with 66%, M15
 ;; ("AUD_USD_M15" (9 20 T 4.092787) "EUR_CHF_M15" (5 30 NIL 4.14177) "EUR_GBP_M15"

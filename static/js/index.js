@@ -252,7 +252,7 @@ $(document).ready(()=>{
       type: 'heatmap',
       // colorscale: 'Bluered',
       colorscale: 'YIOrRd',
-      showscale: false,
+      showscale: true,
       colorbar: {
         xpad: 30
       }
@@ -375,7 +375,7 @@ $(document).ready(()=>{
 
         data.push(heatmapData(res));
         data.push(candlechartData(res));
-        data.push(alertzonesData(res));
+        // data.push(alertzonesData(res));
 
         Plotly.newPlot(element, data, layout, {displayModeBar: false});
       },

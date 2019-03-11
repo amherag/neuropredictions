@@ -19,7 +19,8 @@
                :cl21
                :lparallel
                :local-time
-               :clnuplot
+	       :cl-csv
+               :eazy-gnuplot
                :dexador
                :alexandria
                :cl-json
@@ -48,6 +49,7 @@
                  (:file "config")
                  (:file "predict")
 		 ;; (:file "ga")
-                 (:file "agents" :depends-on ("predict")))))
+                 (:file "agents" :depends-on ("predict"))
+		 (:file "plot"))))
   :description ""
   :in-order-to ((test-op (load-op neuropredictions-test))))
