@@ -466,7 +466,7 @@
      "Done"
      (let ((random (random-float *rand-gen* 0 1.0)) 
            (prob 0) 
-           genotype) 
+           genotype)
        (some (lambda (pair) 
 	       (incf prob (car pair))
 	       (if (> random prob)
